@@ -1,8 +1,6 @@
 HERMES
 ======
 
-[under development]
-
 Introduction
 ======
 
