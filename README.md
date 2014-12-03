@@ -1,10 +1,10 @@
-HERMES
+Hermes
 ======
 
 Introduction
 ======
 
-HERMES is a web-based vocabulary browsing tool for OMOP CDM v5
+Health Entity Relationship and Metadata Exploration System (HERMES) is a web-based vocabulary browsing tool for OMOP CDM v5
 
 HERMES is a project as part of the Observational Health Data Sciences and Informatics (OHDSI, http://ohdsi.org) collaboration.
 
