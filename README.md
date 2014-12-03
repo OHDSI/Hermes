@@ -43,8 +43,7 @@ Getting Started
 
 {Step-by-step instructions for installing software}
 
-Change Log
-======
+
 
 Getting involved
 ======
