@@ -1,0 +1,249 @@
+body {
+	margin-top: 50px;
+	margin-left: 0px;
+	margin-right: 0px;
+}
+nav {
+	min-width: 480px;
+	margin-bottom: 7px;
+}
+.navbar-brand {
+	padding: 0px 10px 0px 0px;
+	line-height: 57px;
+}
+.navbar-brand img {
+	margin-top: -7px;
+}
+input[type=text].navbar-input {
+	width: 300px;
+	height: 30px;
+	line-height: 30px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+#querytext {
+	margin-top: 10px;
+	border-bottom: solid 1px #ccc;
+	border-top: none;
+	border-left: none;
+	border-right: none;
+}
+#welcomepanel {
+	margin-top: 100px;
+}
+#querytext:focus {
+	outline: none;
+}
+#promptpanel {
+	font-size: .9em;
+	margin-top: 7px;
+	color: #fff;
+	position: relative;
+}
+#searchhint {
+	margin-top: 20px;
+	color: #007ACC;
+}
+.promptpanel_prompt {
+	background-color: #007ACC;
+	margin-bottom: 3px;
+	cursor: pointer;
+	padding: 3px;
+	line-height: 26px;
+}
+.promptpanel_prompt:hover {} .promptpanel_prompt.selected {
+	color: #4AC3FF;
+}
+.promptpanel_prompt .glyphicon {
+	top: 3px;
+	padding-left: 3px;
+}
+#tablepanel {
+	padding: 3px;
+	margin-top: 7px;
+}
+#tablepanel label {
+	font-weight: normal;
+	font-size: .9em
+}
+table.dataTable {
+	font-size: .9em;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+	padding: 3px 7px 3px 7px;
+}
+.subcaption {
+	color: #000;
+	font-size: 1.1em;
+	font-weight: bold;
+	margin-top: 15px;
+	margin-bottom: 3px;
+}
+#graphpanel {
+	height: 300px;
+	position: relative;
+	display: none;
+}
+#cy {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+#searchpanel {
+	position: absolute;
+	top: 51px;
+	right: 0px;
+	height: 500px;
+	width: 500px;
+	background-color: #505050;
+	display: none;
+	overflow-y scroll;
+	overflow-x: hidden;
+}
+#searchpanel_searching {
+	display: none;
+	padding: 7px;
+	margin: 3px;
+	color: #eee;
+}
+#searchpanel_error {
+	font-family: Courier New;
+	font-size: 12px;
+	padding: 7px;
+	color: #fee;
+	margin: 7px;
+}
+#paging_container {
+	position: relative;
+	height: 25px;
+	color: #ccc;
+}
+#paging_controls {
+	position: absolute;
+	right: 7px;
+	top: 3px;
+}
+#paging_info {
+	position: absolute;
+	left: 7px;
+	top: 3px;
+}
+#conceptpanel {
+	padding-top: 10px;
+	position: relative;
+}
+.toggle_control {
+	position: float;
+	float: right;
+	margin: 3px;
+	width: 125px;
+	height: 25px;
+	font-size: .9em;
+	line-height: 25px;
+	background-color: #505050;
+	color: #fff;
+	text-align: center;
+	cursor: pointer;
+}
+.toggle_control.selected {
+	color: #4AC3FF;
+}
+#filterpanel {
+	color: #fff;
+	padding: 3px;
+	display: none;
+}
+#filterpanel_container {
+	background-color: #505050;
+	padding: 7px;
+}
+#filterpanel_filters {} .conceptpanel_concept_name {
+	font-size: 1.4em;
+	color: #20425A;
+}
+.filterpanel_facet_name {
+	font-weight: bold;
+	border-bottom: solid 1px #4AC3FF;
+	margin: 5px 1px 3px 1px;
+	text-shadow: rgb(74,195,255) 1px 1px 1px;
+}
+.filterpanel_facet_member_name {
+	font-size: .8em;
+	line-height: 18px;
+	cursor: pointer;
+}
+.filterpanel_facet_member_name.selected {
+	color: #4AC3FF;
+}
+.conceptpanel_concept_details {
+	background-color: #505050;
+	padding: 2px 7px 2px 7px;
+	color: #eee;
+	font-size: .8em;
+	cursor: help;
+}
+.searchpanel_concept {
+	color: #ccc;
+	padding: 3px;
+	color: #fff;
+	position: relative;
+}
+.searchpanel_concept:hover {
+	background-color: #666;
+	cursor: pointer;
+}
+.searchpanel_concept_hotkey {
+	color: #4AC3FF;
+	font-size: 1.2em;
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 20px;
+	text-align: center;
+}
+.searchpanel_facet_hotkey {
+	color: #4AC3FF;
+	font-size: 1.2em;
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 20px;
+	text-align: center;
+}
+.searchpanel_concept_name {
+	text-decoration: none;
+	margin-left: 25px;
+}
+.searchpanel_facets_facet {
+	cursor: pointer;
+	position: relative;
+}
+.searchpanel_facets_facet:hover {
+	background-color: #666;
+}
+.searchpanel_concept_facet_info {
+	color: #ccc;
+	font-size: .8em;
+	margin-left: 25px;
+}
+.searchpanel_facet_member {
+	padding: 3px;
+	margin-left: 25px;
+	color: #fff;
+}
+.searchpanel_facet_percent {
+	height: 5px;
+	background-color: #4AC3FF;
+}
+.span_link {
+	text-decoration: underline;
+	color: #4AC3FF;
+	cursor: pointer;
+	user-select: none;
+}
+table.dataTable.stripe tbody tr.odd,
+table.dataTable.display tbody tr.odd {
+	background-color: #f0f0f0;
+}
