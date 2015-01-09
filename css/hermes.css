@@ -1,25 +1,9 @@
+/* application specific */
+
 body {
 	margin-top: 50px;
 	margin-left: 0px;
 	margin-right: 0px;
-}
-nav {
-	min-width: 480px;
-	margin-bottom: 7px;
-}
-.navbar-brand {
-	padding: 0px 10px 0px 0px;
-	line-height: 57px;
-}
-.navbar-brand img {
-	margin-top: -7px;
-}
-input[type=text].navbar-input {
-	width: 300px;
-	height: 30px;
-	line-height: 30px;
-	padding-left: 10px;
-	padding-right: 10px;
 }
 #querytext {
 	margin-top: 10px;
@@ -28,7 +12,7 @@ input[type=text].navbar-input {
 	border-left: none;
 	border-right: none;
 }
-#welcomepanel {
+#welcome_panel_container {
 	margin-top: 100px;
 }
 #querytext:focus {
@@ -45,7 +29,7 @@ input[type=text].navbar-input {
 	color: #007ACC;
 }
 .promptpanel_prompt {
-	background-color: #007ACC;
+	background-color: #428bca;
 	margin-bottom: 3px;
 	cursor: pointer;
 	padding: 3px;
@@ -58,40 +42,13 @@ input[type=text].navbar-input {
 	top: 3px;
 	padding-left: 3px;
 }
-#tablepanel {
-	padding: 3px;
-	margin-top: 7px;
-}
-#tablepanel label {
-	font-weight: normal;
-	font-size: .9em
-}
 table.dataTable {
 	font-size: .9em;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button {
 	padding: 3px 7px 3px 7px;
 }
-.subcaption {
-	color: #000;
-	font-size: 1.1em;
-	font-weight: bold;
-	margin-top: 15px;
-	margin-bottom: 3px;
-}
-#graphpanel {
-	height: 300px;
-	position: relative;
-	display: none;
-}
-#cy {
-	height: 100%;
-	width: 100%;
-	position: absolute;
-	left: 0;
-	top: 0;
-}
-#searchpanel {
+#search_panel_container {
 	position: absolute;
 	top: 51px;
 	right: 0px;
@@ -130,9 +87,10 @@ table.dataTable {
 	left: 7px;
 	top: 3px;
 }
-#conceptpanel {
+#concept_panel_container {
 	padding-top: 10px;
 	position: relative;
+	margin-bottom: 10px;
 }
 .toggle_control {
 	position: float;
@@ -152,11 +110,9 @@ table.dataTable {
 }
 #filterpanel {
 	color: #fff;
-	padding: 3px;
-	display: none;
 }
 #filterpanel_container {
-	background-color: #505050;
+	color: #222;
 	padding: 7px;
 }
 #filterpanel_filters {} .conceptpanel_concept_name {
@@ -165,9 +121,8 @@ table.dataTable {
 }
 .filterpanel_facet_name {
 	font-weight: bold;
-	border-bottom: solid 1px #4AC3FF;
+	border-bottom: solid 1px #444;
 	margin: 5px 1px 3px 1px;
-	text-shadow: rgb(74,195,255) 1px 1px 1px;
 }
 .filterpanel_facet_member_name {
 	font-size: .8em;
@@ -175,7 +130,8 @@ table.dataTable {
 	cursor: pointer;
 }
 .filterpanel_facet_member_name.selected {
-	color: #4AC3FF;
+	color: #3AB8F9;
+	font-weight: bold;
 }
 .conceptpanel_concept_details {
 	background-color: #505050;
@@ -193,6 +149,13 @@ table.dataTable {
 .searchpanel_concept:hover {
 	background-color: #666;
 	cursor: pointer;
+}
+#searchpanel_current_facet {
+	color: #fff;
+	font-size: 1.2em;
+	margin-top: 3px;
+	margin-left: 3px;
+	font-weight: bold;
 }
 .searchpanel_concept_hotkey {
 	color: #4AC3FF;
@@ -243,7 +206,96 @@ table.dataTable {
 	cursor: pointer;
 	user-select: none;
 }
+#generated_codeset_container {
+	margin-top: 10px;
+}
+
+/* Bootstrap overrides */
+nav {
+	min-width: 480px;
+	margin-bottom: 7px;
+}
+.navbar-brand {
+	padding: 0px 10px 0px 0px;
+	line-height: 57px;
+}
+.navbar-brand img {
+	margin-top: -7px;
+}
+input[type=text].navbar-input {
+	width: 300px;
+	height: 30px;
+	line-height: 30px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.panel-heading {
+	padding: 5px 15px;
+	line-height: 30px;
+}
+.badge {
+	border-radius: 5px;
+}
+a {
+	color: #428bca;
+}
+
+/* datatable overrides */
+table.dataTable.hover tbody tr td {
+	border-bottom: solid 1px #eee;
+}
+table.dataTable td {
+	cursor: default;
+}
 table.dataTable.stripe tbody tr.odd,
 table.dataTable.display tbody tr.odd {
 	background-color: #f0f0f0;
+}
+table.dataTable.stripe tbody tr.odd.selected,
+table.dataTable.display tbody tr.odd.selected {
+	background-color: #F7F780;
+}
+table.dataTable.stripe tbody tr.even.selected,
+table.dataTable.display tbody tr.even.selected {
+	background-color: #F7F700;
+}
+table.dataTable.hover tbody tr:hover.selected,
+table.dataTable.hover tbody tr.odd:hover.selected {
+	background-color: #F7F780;
+}
+table.dataTable.hover tbody tr:hover.selected,
+table.dataTable.hover tbody tr.even:hover.selected {
+	background-color: #F7F700;
+}
+table.dataTable.hover tbody tr:hover td,
+table.dataTable.hover tbody tr.odd:hover {
+	border-bottom: solid 1px #F7F780;
+}
+table.dataTable.hover tbody tr:hover td,
+table.dataTable.hover tbody tr.even:hover {
+	border-bottom: solid 1px #F7F700;
+}
+
+/* override default hover colors */
+table.dataTable.hover tbody tr.even:hover,
+table.dataTable.display tbody tr.even:hover {
+	background-color: #fff;
+}
+table.dataTable.hover tbody tr.odd:hover,
+table.dataTable.display tbody tr.odd:hover {
+	background-color: #f0f0f0;
+}
+
+/* colVis formatting */
+ul.ColVis_collection {
+	width: 200px;
+}
+button.ColVis_Button {
+	margin-left: 10px;
+	height: 25px;
+	-webkit-box-shadow: 1px 1px 1px #ccc;
+	-moz-box-shadow: 1px 1px 1px #ccc;
+	-ms-box-shadow: 1px 1px 1px #ccc;
+	-o-box-shadow: 1px 1px 1px #ccc;
+	box-shadow: 1px 1px 1px #ccc;
 }

@@ -3,6 +3,7 @@ var page_model;
 var fe_search;
 var facet_hotkey_mode = false;
 var concept_hotkey_mode = false;
+var datatable_keyboard_mode = false;
 var current_facet_index = 0;
 var facet_selections = [];
 var hotkey_handlers = [];
@@ -15,8 +16,20 @@ $(document).ready(function () {
 		'/concept/:concept_id:': load_concept
 	}
 
+	$(document).on('click', '#dt_related tr', function () {
+		$(this).toggleClass('selected');
+	});
+
 	router = new Router(routes);
 	router.init();
+
+	// prevent keyboard hype while typing in datatable search box
+	$(document).on('focusin', 'input[type="search"]', function () {
+		datatable_keyboard_mode = true;
+	});
+	$(document).on('focusout', 'input[type="search"]', function () {
+		datatable_keyboard_mode = false;
+	});
 
 	page_model = {
 		current_facet: ko.observable(),
@@ -28,6 +41,10 @@ $(document).ready(function () {
 		prompts: ko.observableArray(),
 		total_pages: 0,
 		page_length: 9,
+		selected_concepts: ko.observableArray(),
+		selected_concepts_index: {},
+		generated_codeset: ko.observable(),
+		show_advanced_filters: ko.observable(false),
 		modifier_key_down: false,
 		activate_prompt: function (prompt) {
 			page_model.fe_related().SetFilter(prompt.filters);
@@ -35,6 +52,42 @@ $(document).ready(function () {
 			page_model.fe_related(page_model.fe_related());
 			var new_prompts = prompter.get_prompts(page_model.current_concept(), page_model.fe_related());
 			page_model.prompts(new_prompts);
+		},
+		select_concepts_all: function () {
+			$($('#dt_related').DataTable().rows({
+				'search': 'applied'
+			}).nodes()).addClass('selected');
+		},
+		select_concepts_none: function () {
+			$($('#dt_related').DataTable().rows().nodes()).removeClass('selected');
+		},
+		save_selected_concepts: function () {
+			var new_concepts = $('#dt_related').DataTable().rows('.selected', {
+				'search': 'applied'
+			}).data();
+			for (var i = 0; i < new_concepts.length; i++) {
+				if (page_model.selected_concepts_index[new_concepts[i].CONCEPT_ID] == 1) {
+					// already in the bag
+				} else {
+					page_model.selected_concepts_index[new_concepts[i].CONCEPT_ID] = 1;
+					page_model.selected_concepts.push(new_concepts[i]);
+				}
+			}
+		},
+		clear_selected_concepts: function () {
+			page_model.selected_concepts_index = {};
+			page_model.generated_codeset(null);
+			page_model.selected_concepts.removeAll();
+		},
+		generate_codeset: function () {
+			var comma_separated_codeset = '';
+			for (var i = 0; i < page_model.selected_concepts().length; i++) {
+				if (i > 0) {
+					comma_separated_codeset += ', ';
+				}
+				comma_separated_codeset += page_model.selected_concepts()[i].CONCEPT_ID;
+			}
+			page_model.generated_codeset(comma_separated_codeset);
 		},
 		update_filters: function () {
 			$(event.target).toggleClass('selected');
@@ -140,8 +193,12 @@ $(document).ready(function () {
 	});
 
 	$(document).keydown(function (e) {
-		if (e.keyCode == 17 || e.keyCode == 18) {
+		// prevent keyboard hype while typing in datatable search box
+		if (datatable_keyboard_mode) {
+			return;
+		}
 
+		if (e.keyCode == 17 || e.keyCode == 18) {
 			page_model.modifier_key_down = true;
 			return; // control key
 		}
@@ -184,7 +241,7 @@ $(document).ready(function () {
 			if (e.keyCode != 27) {
 				$('#querytext').focus();
 			} else {
-				$('#searchpanel').fadeOut(200);
+				$('#search_panel_container').fadeOut(200);
 			}
 		}
 	});
@@ -206,14 +263,14 @@ $(document).ready(function () {
 		if (e.keyCode == 13) { // enter
 			var querystring = $('#querytext').val();
 			if (querystring.length > 2) {
-				$('#searchpanel').slideDown(200);
+				$('#search_panel_container').slideDown(200);
 				search(querystring);
 			}
 		}
 	});
 
-	$('#conceptpanel').on('click', function () {
-		$('#searchpanel').fadeOut(200);
+	$('#concept_panel_container').on('click', function () {
+		$('#search_panel_container').fadeOut(200);
 	});
 
 	ko.applyBindings(page_model);
@@ -221,7 +278,7 @@ $(document).ready(function () {
 
 function toggle_filters() {
 	$('#filter_control').toggleClass('selected');
-	$('#filterpanel').toggle();
+	page_model.show_advanced_filters(!page_model.show_advanced_filters());
 }
 
 function link_renderer(s, p, d) {
@@ -265,18 +322,24 @@ function search(query) {
 			fe_search = new FacetEngine({
 				Facets: [
 					{
+						'caption': 'Domain',
+						'binding': function (o) {
+							return o.DOMAIN_ID;
+						}
+					},
+					{
+						'caption': 'Standard Concept',
+						'binding': function (o) {
+							return o.STANDARD_CONCEPT;
+						}
+					},
+					{
 						'caption': 'Vocabulary',
 						'binding': function (o) {
 							return o.VOCABULARY_ID;
 						}
-				},
-					{
-						'caption': 'Class',
-						'binding': function (o) {
-							return o.CONCEPT_CLASS_ID;
-						}
-				}
-			]
+					}
+				]
 			});
 
 			for (c = 0; c < results.length; c++) {
@@ -288,7 +351,7 @@ function search(query) {
 			fe_search.sortFacetMembers();
 
 			page_model.current_facet(fe_search.Facets[0]);
-			$('#searchpanel').scrollTop(0);
+			$('#search_panel_container').scrollTop(0);
 		},
 		error: function (xhr, message) {
 			$('#searchpanel_searching').hide();
@@ -299,18 +362,18 @@ function search(query) {
 }
 
 function load_concept(concept_id) {
-	$('#welcomepanel').hide();
+	$('#welcome_panel_container').hide();
 
-	$('#searchpanel').fadeOut();
+	$('#search_panel_container').fadeOut();
 	$('#tablepanel').hide();
-	$('#conceptpanel').hide();
-	$('#promptpanel').hide();
+	$('#concept_panel_container').hide();
+	$('#prompt_panel_container').hide();
 
 	concept_hotkey_mode = false;
 
 	var concept_promise = $.getJSON(get_concept_url + concept_id, function (c) {
 		page_model.current_concept(c);
-		$('#conceptpanel').fadeIn();
+		$('#concept_panel_container').fadeIn();
 	});
 
 	var related_promise = $.getJSON(ohdsi_services_root + 'concept/' + concept_id + '/related', function (related) {
@@ -322,6 +385,18 @@ function load_concept(concept_id) {
 					'caption': 'Vocabulary',
 					'binding': function (o) {
 						return o.VOCABULARY_ID;
+					}
+				},
+				{
+					'caption': 'Standard Concept',
+					'binding': function (o) {
+						return o.STANDARD_CONCEPT;
+					}
+				},
+				{
+					'caption': 'Invalid Reason',
+					'binding': function (o) {
+						return o.INVALID_REASON;
 					}
 				},
 				{
@@ -378,6 +453,6 @@ function load_concept(concept_id) {
 		$('.conceptpanel_concept_details').tooltip();
 		var prompts = prompter.get_prompts(page_model.current_concept(), page_model.fe_related());
 		page_model.prompts(prompts);
-		$('#promptpanel').show();
+		$('#prompt_panel_container').show();
 	});
 }

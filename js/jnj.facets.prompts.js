@@ -15,29 +15,42 @@ var prompter = {
 		}]);
 
 		switch (concept.VOCABULARY_ID) {
-		case 'SNOMED':
-			{
+			case 'SNOMED':
+				{
+					switch (concept.CONCEPT_CLASS_ID) {
+					case 'Clinical Finding':
+						this.resolve_prompt('What Preferred Terms are related to this Clinical Finding?', [{
+							c: 'Class',
+							n: 'Preferred Term'
+						}]);
+						this.resolve_prompt('What indications are there for this Clinical Finding?', [{
+							c: 'Class',
+							n: 'Indication'
+						}]);
+						break;
+					}
+					break;
+				}
+			case 'RxNorm':
 				switch (concept.CONCEPT_CLASS_ID) {
-				case 'Clinical finding':
-					this.resolve_prompt('What Preferred Terms are related to this Clinical Finding?', [{
+				case 'Ingredient':
+					this.resolve_prompt('What are the Brand Names for this Ingredient?', [{
 						c: 'Class',
-						n: 'Preferred Term'
+						n: 'Brand Name'
 					}]);
 					break;
 				}
 				break;
-			}
-		case 'RxNorm':
-			switch (concept.CONCEPT_CLASS_ID) {
-			case 'Ingredient':
-				this.resolve_prompt('What are the Brand Names for this Ingredient?', [{
-					c: 'Class',
-					n: 'Brand Name'
-				}]);
+			case 'Indication':
+				switch (concept.CONCEPT_CLASS_ID) {
+						case 'Indication':
+							this.resolve_prompt('What ingredients are related to this Indication?', [{
+								c: 'Class',
+								n: 'Ingredient'
+							}]);
+						break;
+				}
 				break;
-			}
-			break;
-		case 'Indication':
 		}
 
 		return this.prompts;

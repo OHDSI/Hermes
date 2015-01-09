@@ -1,1 +1,1 @@
-var ohdsi_services_root = "http://YOUR SERVER/WebAPI/vocabulary/";
+var ohdsi_services_root = "http://localhost:8080/WebAPI/vocabulary/";

@@ -7,7 +7,7 @@
 	<link rel="stylesheet" type="text/css" href="css/bootstrap-flat.min.css" />
 	<link rel="stylesheet" type="text/css" href="css/bootstrap-flat-extras.min.css" />
 	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.min.css" />
-
+	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.colvis.css" />
 	<link rel="stylesheet" type="text/css" href="css/hermes.css" />
 
 	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
@@ -16,6 +16,7 @@
 	<script type="text/javascript" src="js/knockout.dataTables.binding.js"></script>
 	<script type="text/javascript" src="js/director.min.js"></script>
 	<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="js/jquery.dataTables.colVis.min.js"></script>
 	<script type="text/javascript" src="js/jnj.facets.js"></script>
 	<script type="text/javascript" src="js/jnj.facets.prompts.js"></script>
 	<script type="text/javascript" src="js/config.js"></script>
@@ -23,7 +24,7 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav id="topnavigation" class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div class="container">
 			<a class="navbar-brand" href="#">
 				<img class="" src="images/logo.png">HERMES</a>
@@ -33,7 +34,7 @@
 		</div>
 	</nav>
 
-	<div id="welcomepanel" class="container">
+	<div id="welcome_panel_container" class="container">
 		<div class="panel panel-default">
 			<div class="panel-heading">Welcome to HERMES</div>
 			<div class="panel-body">HERMES is the Health Entity Relationship and Metadata Exploration System (HERMES). HERMES is a web-based vocabulary browsing tool for OMOP CDM v5.
@@ -43,24 +44,36 @@
 
 	</div>
 
-	<div id="conceptpanel" class="container" data-bind="if: current_concept">
-		<div onclick="toggle_filters();" id="filter_control" class="toggle_control">Advanced Filters</div>
-		<div id="conceptpanel_concept" data-bind="with: current_concept">
-			<div class="conceptpanel_concept_name " data-bind="text:CONCEPT_NAME">
+	<div id="concept_panel_container" class="container" data-bind="if: current_concept">
+		<div class="row">
+			<div class="col-sm-6">
+				<div id="conceptpanel_concept" data-bind="with: current_concept">
+					<div class="conceptpanel_concept_name " data-bind="text:CONCEPT_NAME">
+					</div>
+					<div>
+						<span class="conceptpanel_concept_details" data-bind="text:DOMAIN_ID " title="Domain"></span>
+						<span class="conceptpanel_concept_details" data-bind="text:VOCABULARY_ID " title="Vocabulary"></span>
+						<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CODE " title="Concept Code"></span>
+						<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_ID " title="Concept Identifier"></span>
+						<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CLASS_ID " title="Class"></span>
+					</div>
+				</div>
 			</div>
-			<div>
-				<span class="conceptpanel_concept_details" data-bind="text:VOCABULARY_ID " title="Vocabulary"></span>
-				<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CLASS_ID " title="Class"></span>
-				<span class="conceptpanel_concept_details" data-bind="text:DOMAIN_ID " title="Domain"></span>
-				<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_ID " title="Concept Identifier"></span>
+			<div class="col-sm-6 text-right">
+				<button onclick="toggle_filters();" class="btn btn-primary btn-sm">Advanced Filters</button>
+				<span data-bind="if: selected_concepts().length > 0">
+					<button class="btn btn-primary btn-sm" type="button">
+						Selected Concepts <span data-bind="text:selected_concepts().length" class="badge"></span>
+				</button>
+				</span>
 			</div>
 		</div>
 	</div>
 
-	<div class="container">
-		<div data-bind="if: prompts().length > 0">
-			<div class="subcaption">Related Concept Filters</div>
-			<div id="promptpanel" data-bind="foreach:prompts">
+	<div id="prompt_panel_container" class="container" data-bind="if:prompts().length > 0">
+		<div class="panel panel-default">
+			<div class="panel-heading">Related Concept Filters</div>
+			<div id="promptpanel" class="panel-body" data-bind="foreach:prompts">
 				<div class="promptpanel_prompt" data-bind="click:page_model.activate_prompt">
 					<span class="glyphicon glyphicon-filter"></span>
 					<span class="promptpanel_prompt_caption" data-bind="text:caption">
@@ -70,15 +83,15 @@
 		</div>
 	</div>
 
-	<div class="container">
-		<div data-bind="if: fe_related">
-			<div id="filterpanel" data-bind="with: fe_related">
-				<div class="subcaption">Advanced Filters</div>
-				<div id="filterpanel_container" class="row" data-bind="foreach:Facets">
-					<div class="col-md-3">
+	<div id="advanced_panel_container" class="container" data-bind="visible:show_advanced_filters">
+		<div class="panel panel-default" data-bind="if: fe_related">
+			<div class="panel-heading">Related Concept Advanced Filters</div>
+			<div id="filterpanel" class="panel-body" style="padding:0px 15px 0px 15px;" data-bind="with: fe_related">
+				<div id="filterpanel_container" data-bind="foreach:Facets">
+					<div class="row">
 						<div class="filterpanel_facet_name" data-bind="text:caption"></div>
 						<div class="filterpanel_facet_members" data-bind="foreach:Members">
-							<div class="filterpanel_facet_member">
+							<div class="col-sm-2 filterpanel_facet_member">
 								<span class="filterpanel_facet_member_name" data-bind="attr: {id: $parentContext.$index() + '-' + $index()}, click: function() { page_model.update_filters(); }, css : {selected: Selected}, text:Name + ' (' + ActiveCount + ')'"></span>
 							</div>
 						</div>
@@ -86,30 +99,115 @@
 				</div>
 			</div>
 		</div>
+	</div>
 
-		<div id="tablepanel" data-bind="if: fe_related">
-			<div class="subcaption">Related Concept Listing</div>
-			<table id="dt_related" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
+	<div id="tablepanel" class="container " data-bind="if: fe_related">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="row">
+					<div class="col-sm-9">
+						Related Concept Listing
+					</div>
+					<div class="col-sm-3 text-right">
+						<div class="dropdown">
+							<button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+								Related Concepts
+								<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu dropdown-menu-right" role="menu">
+								<li role="presentation"><a href="javascript:page_model.select_concepts_all();" role="menuitem" tabindex="-1">Select All</a>
+								</li>
+								<li role="presentation"><a href="javascript:page_model.select_concepts_none();" role="menuitem" tabindex="-1">Select None</a>
+								</li>
+								<li role="presentation"><a href="javascript:page_model.save_selected_concepts();" role="menuitem" tabindex="-1">Save Selections</a>
+								</li>
+								<li role="presentation"><a href="javascript:page_model.select_concepts_all();page_model.save_selected_concepts();" role="menuitem" tabindex="-1">Select All and Save Selections</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel-body">
+				<table id="dt_related" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
             data: page_model.fe_related().GetCurrentObjects(),
+            options: {
+												dom: 'Clfrtip',
+												orderClasses: false,
+                        aoColumns: [
+														{ sTitle: 'Concept Id', mData: 'CONCEPT_ID', bVisible: false},
+														{ sTitle: 'Concept Code', mData: 'CONCEPT_CODE', bVisible: false},
+                            { sTitle: 'Related Concept', mData: 'CONCEPT_NAME', mRender: link_renderer},
+                            { sTitle: 'Class', mData: 'CONCEPT_CLASS_ID' },
+													  { sTitle: 'Relationship', mData: 'RELATIONSHIP_CAPTION', bVisible: false},
+                            { sTitle: 'Domain', mData: 'DOMAIN_ID' },
+														{ sTitle: 'Vocabulary', mData: 'VOCABULARY_ID' }
+                        ]
+                    }
+        }">
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<div id="selected_concepts_container" class="container" data-bind="visible: selected_concepts().length > 0">
+		<div id="selected_concepts_panel" class="panel panel-default ">
+			<div class="panel-heading">
+				<div class="row">
+					<div class="col-sm-9">
+						Selected Concept Listing
+					</div>
+					<div class="col-sm-3 text-right">
+						<div class="dropdown">
+							<button class="btn btn-sm btn-default dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+								Selected Concepts
+								<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu dropdown-menu-right" role="menu">
+								<li role="presentation"><a href="javascript:page_model.clear_selected_concepts();" role="menuitem" tabindex="-1">Clear All</a>
+								</li>
+								<li role="presentation"><a href="javascript:page_model.generate_codeset();" role="menuitem" tabindex="-1">Generate Code Set</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="panel-body">
+				<table id="dt_selected" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
+            data: page_model.selected_concepts(),
             options: {
 												orderClasses: false,
 												deferRender: true,
                         aoColumns: [
-                            { sTitle: 'Related Concept', mData: 'CONCEPT_NAME', mRender: link_renderer},
+														{ sTitle: 'Concept Id', mData: 'CONCEPT_ID'},
+														{ sTitle: 'Concept Code', mData: 'CONCEPT_CODE'},
+                            { sTitle: 'Concept Name', mData: 'CONCEPT_NAME', mRender: link_renderer},
                             { sTitle: 'Class', mData: 'CONCEPT_CLASS_ID' },
                             { sTitle: 'Domain', mData: 'DOMAIN_ID' },
 														{ sTitle: 'Vocabulary', mData: 'VOCABULARY_ID' }
                         ]
                     }
         }">
-			</table>
+				</table>
+
+				<div id="generated_codeset_container" data-bind="if:generated_codeset">
+					<div class="panel panel-default">
+						<div class="panel-heading">Generated Codeset</div>
+						<div class="panel-body">
+							<samp data-bind="text: generated_codeset"></samp>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 
-	<div id="searchpanel">
+	<div id="search_panel_container">
 		<div id="searchpanel_searching">s e a r c h i n g . . .</div>
 		<div id="searchpanel_error"></div>
 		<div id="searchpanel_facets" data-bind="with:current_facet">
+			<div id="searchpanel_current_facet" data-bind="text:caption"></div>
 			<div id="searchpanel_facet" data-bind="foreach:Members.filter(function(m) {return m.ActiveCount > 0;})">
 				<div class="searchpanel_facets_facet" data-bind="click:$root.add_filter">
 					<div class="searchpanel_facet_hotkey" data-bind="text:$root.add_hotkey(Name)"></div>
@@ -142,6 +240,7 @@
 					<div>
 						<span class="searchpanel_concept_facet_info" data-bind="text:VOCABULARY_ID "></span>
 						<span class="searchpanel_concept_facet_info" data-bind="text:DOMAIN_ID "></span>
+						<span class="searchpanel_concept_facet_info" data-bind="text:CONCEPT_CODE "></span>
 					</div>
 				</div>
 			</div>
