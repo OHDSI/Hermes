@@ -5,18 +5,22 @@ body {
 	margin-left: 0px;
 	margin-right: 0px;
 }
-#querytext {
-	margin-top: 10px;
-	border-bottom: solid 1px #ccc;
-	border-top: none;
-	border-left: none;
-	border-right: none;
+#topnavigation .input-group {
+	margin-top: 8px;
 }
-#welcome_panel_container {
-	margin-top: 100px;
+#topnavigation .glyphicon-cog {
+	font-size:1.4em;
+	color:#4AC3FF;
+}
+#querytext {
+	float: right;
+	width: 200px;
 }
 #querytext:focus {
 	outline: none;
+}
+#welcome_panel_container {
+	margin-top: 100px;
 }
 #promptpanel {
 	font-size: .9em;
@@ -28,17 +32,22 @@ body {
 	margin-top: 20px;
 	color: #007ACC;
 }
-.promptpanel_prompt {
+#loading_panel {
+	padding: 50px;
+	color: #888;
+	display:none;
+}
+.promptpanel-prompt {
 	background-color: #428bca;
 	margin-bottom: 3px;
 	cursor: pointer;
 	padding: 3px;
 	line-height: 26px;
 }
-.promptpanel_prompt:hover {} .promptpanel_prompt.selected {
+.promptpanel-prompt:hover {} .promptpanel_prompt.selected {
 	color: #4AC3FF;
 }
-.promptpanel_prompt .glyphicon {
+.promptpanel-prompt .glyphicon {
 	top: 3px;
 	padding-left: 3px;
 }
@@ -140,6 +149,18 @@ table.dataTable {
 	font-size: .8em;
 	cursor: help;
 }
+.conceptpanel_concept_details.invalid {
+	background-color: #C05050;
+}
+
+.searchpanel_concept_name .invalid {
+	color:#C05050;
+}
+
+a.invalid {
+	color:#C05050;
+}
+
 .searchpanel_concept {
 	color: #ccc;
 	padding: 3px;
@@ -209,93 +230,13 @@ table.dataTable {
 #generated_codeset_container {
 	margin-top: 10px;
 }
-
-/* Bootstrap overrides */
-nav {
-	min-width: 480px;
-	margin-bottom: 7px;
+.service-name {
+	font-weight: bold;
 }
-.navbar-brand {
-	padding: 0px 10px 0px 0px;
-	line-height: 57px;
+.service-name .glyphicon-ok-sign {
+	color: #4AC3FF;
 }
-.navbar-brand img {
-	margin-top: -7px;
-}
-input[type=text].navbar-input {
-	width: 300px;
-	height: 30px;
-	line-height: 30px;
-	padding-left: 10px;
-	padding-right: 10px;
-}
-.panel-heading {
-	padding: 5px 15px;
-	line-height: 30px;
-}
-.badge {
-	border-radius: 5px;
-}
-a {
-	color: #428bca;
-}
-
-/* datatable overrides */
-table.dataTable.hover tbody tr td {
-	border-bottom: solid 1px #eee;
-}
-table.dataTable td {
-	cursor: default;
-}
-table.dataTable.stripe tbody tr.odd,
-table.dataTable.display tbody tr.odd {
-	background-color: #f0f0f0;
-}
-table.dataTable.stripe tbody tr.odd.selected,
-table.dataTable.display tbody tr.odd.selected {
-	background-color: #F7F780;
-}
-table.dataTable.stripe tbody tr.even.selected,
-table.dataTable.display tbody tr.even.selected {
-	background-color: #F7F700;
-}
-table.dataTable.hover tbody tr:hover.selected,
-table.dataTable.hover tbody tr.odd:hover.selected {
-	background-color: #F7F780;
-}
-table.dataTable.hover tbody tr:hover.selected,
-table.dataTable.hover tbody tr.even:hover.selected {
-	background-color: #F7F700;
-}
-table.dataTable.hover tbody tr:hover td,
-table.dataTable.hover tbody tr.odd:hover {
-	border-bottom: solid 1px #F7F780;
-}
-table.dataTable.hover tbody tr:hover td,
-table.dataTable.hover tbody tr.even:hover {
-	border-bottom: solid 1px #F7F700;
-}
-
-/* override default hover colors */
-table.dataTable.hover tbody tr.even:hover,
-table.dataTable.display tbody tr.even:hover {
-	background-color: #fff;
-}
-table.dataTable.hover tbody tr.odd:hover,
-table.dataTable.display tbody tr.odd:hover {
-	background-color: #f0f0f0;
-}
-
-/* colVis formatting */
-ul.ColVis_collection {
-	width: 200px;
-}
-button.ColVis_Button {
-	margin-left: 10px;
-	height: 25px;
-	-webkit-box-shadow: 1px 1px 1px #ccc;
-	-moz-box-shadow: 1px 1px 1px #ccc;
-	-ms-box-shadow: 1px 1px 1px #ccc;
-	-o-box-shadow: 1px 1px 1px #ccc;
-	box-shadow: 1px 1px 1px #ccc;
+.service-info {
+	color: #888;
+	font-size: .8em;
 }

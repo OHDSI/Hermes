@@ -8,30 +8,12 @@ var current_facet_index = 0;
 var facet_selections = [];
 var hotkey_handlers = [];
 var hotkey_index = 0;
-var search_url = ohdsi_services_root + 'search/';
-var get_concept_url = ohdsi_services_root + 'concept/';
 
 $(document).ready(function () {
-	var routes = {
-		'/concept/:concept_id:': load_concept
-	}
-
-	$(document).on('click', '#dt_related tr', function () {
-		$(this).toggleClass('selected');
-	});
-
-	router = new Router(routes);
-	router.init();
-
-	// prevent keyboard hype while typing in datatable search box
-	$(document).on('focusin', 'input[type="search"]', function () {
-		datatable_keyboard_mode = true;
-	});
-	$(document).on('focusout', 'input[type="search"]', function () {
-		datatable_keyboard_mode = false;
-	});
 
 	page_model = {
+		ohdsi_services: ko.observableArray(ohdsi_services),
+		ohdsi_service: ko.observable(ohdsi_services[0].url),
 		current_facet: ko.observable(),
 		current_concept: ko.observable(),
 		related_concepts: ko.observableArray(),
@@ -46,6 +28,10 @@ $(document).ready(function () {
 		generated_codeset: ko.observable(),
 		show_advanced_filters: ko.observable(false),
 		modifier_key_down: false,
+		update_service: function (service) {
+			page_model.ohdsi_service(service.url);
+			page_model.ohdsi_services(ohdsi_services);
+		},
 		activate_prompt: function (prompt) {
 			page_model.fe_related().SetFilter(prompt.filters);
 			page_model.related_concepts(page_model.fe_related().GetCurrentObjects());
@@ -187,6 +173,42 @@ $(document).ready(function () {
 		}
 	};
 
+	$.each(ohdsi_services, function (index, service) {
+		$.ajax({
+			url: service.url + 'vocabulary/info',
+			async: false,
+			method: 'GET',
+			contentType: 'application/json',
+			success: function (info) {
+				service.version = info.version;
+				service.dialect = info.dialect;
+			},
+			error: function (err) {
+				service.version = 'unknown';
+				service.dialect = 'unknown';
+			}
+		});
+	});
+
+	var routes = {
+		'/concept/:concept_id:': load_concept
+	}
+
+	$(document).on('click', '#dt_related tr', function () {
+		$(this).toggleClass('selected');
+	});
+
+	router = new Router(routes);
+	router.init();
+
+	// prevent keyboard hype while typing in datatable search box
+	$(document).on('focusin', 'input[type="search"]', function () {
+		datatable_keyboard_mode = true;
+	});
+	$(document).on('focusout', 'input[type="search"]', function () {
+		datatable_keyboard_mode = false;
+	});
+
 	// keyboard hype
 	$(document).keyup(function (e) {
 		page_model.modifier_key_down = false;
@@ -282,7 +304,8 @@ function toggle_filters() {
 }
 
 function link_renderer(s, p, d) {
-	return '<a href=\"#/concept/' + d.CONCEPT_ID + '\">' + d.CONCEPT_NAME + '</a>';
+	var valid = d.INVALID_REASON == 'Invalid' ? 'invalid' : '';
+	return '<a class="' + valid + '" href=\"#/concept/' + d.CONCEPT_ID + '\">' + d.CONCEPT_NAME + '</a>';
 }
 
 function resetSearchPanel() {
@@ -309,7 +332,7 @@ function search(query) {
 	current_facet_index = 0;
 
 	$.ajax({
-		url: search_url + query,
+		url: page_model.ohdsi_service() + 'vocabulary/search/' + query,
 		success: function (results) {
 			if (results.length == 0) {
 				$('#searchpanel_searching').hide();
@@ -369,14 +392,16 @@ function load_concept(concept_id) {
 	$('#concept_panel_container').hide();
 	$('#prompt_panel_container').hide();
 
+	$('#loading_panel').show();
+
 	concept_hotkey_mode = false;
 
-	var concept_promise = $.getJSON(get_concept_url + concept_id, function (c) {
+	var concept_promise = $.getJSON(page_model.ohdsi_service() + 'vocabulary/concept/' + concept_id, function (c) {
 		page_model.current_concept(c);
 		$('#concept_panel_container').fadeIn();
 	});
 
-	var related_promise = $.getJSON(ohdsi_services_root + 'concept/' + concept_id + '/related', function (related) {
+	var related_promise = $.getJSON(page_model.ohdsi_service() + 'vocabulary/concept/' + concept_id + '/related', function (related) {
 		page_model.related_concepts(related);
 
 		var fe_temp = new FacetEngine({
@@ -454,5 +479,6 @@ function load_concept(concept_id) {
 		var prompts = prompter.get_prompts(page_model.current_concept(), page_model.fe_related());
 		page_model.prompts(prompts);
 		$('#prompt_panel_container').show();
+		$('#loading_panel').hide();
 	});
 }

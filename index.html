@@ -9,6 +9,8 @@
 	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.colVis.css" />
 	<link rel="stylesheet" type="text/css" href="css/hermes.css" />
+	<link rel="stylesheet" type="text/css" href="css/hermes.boostrap.css" />
+	<link rel="stylesheet" type="text/css" href="css/hermes.dataTables.css" />
 
 	<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
@@ -26,11 +28,30 @@
 <body>
 	<nav id="topnavigation" class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div class="container">
+
 			<a class="navbar-brand" href="#">
 				<img class="" src="images/logo.png">HERMES</a>
-			<div class="navbar-right">
-				<input id="querytext" class="navbar-input" type="text" placeholder="Search">
+
+			<div class="input-group">
+				<input type="text" class="form-control" id="querytext" placeholder="Search">
+				<div class="input-group-btn">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="glyphicon glyphicon-cog"></span></span>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right" role="menu" data-bind="foreach:ohdsi_services">
+						<li>
+							<a href="#" data-bind="click: $root.update_service">
+								<div class="service-name">
+									<span data-bind="text: name"></span>
+									<span data-bind="visible: url == $root.ohdsi_service()" class="glyphicon glyphicon-ok-sign"></span>
+								</div>
+								<div class="service-info" data-bind="text:'Vocabulary ' + version + ' (' + dialect + ')'"></div>
+							</a>
+						</li>
+					</ul>
+				</div>
 			</div>
+
+		</div>
 		</div>
 	</nav>
 
@@ -41,7 +62,6 @@
 				<div id="searchhint" class="text-center">type anywhere and press enter to begin a new search</div>
 			</div>
 		</div>
-
 	</div>
 
 	<div id="concept_panel_container" class="container" data-bind="if: current_concept">
@@ -56,6 +76,7 @@
 						<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CODE " title="Concept Code"></span>
 						<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_ID " title="Concept Identifier"></span>
 						<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CLASS_ID " title="Class"></span>
+						<span class="conceptpanel_concept_details" data-bind="text:INVALID_REASON, attr: { class: INVALID_REASON == 'Valid' ? 'conceptpanel_concept_details' : 'conceptpanel_concept_details invalid'} " title="Invalid Reason"></span>
 					</div>
 				</div>
 			</div>
@@ -74,9 +95,9 @@
 		<div class="panel panel-default">
 			<div class="panel-heading">Related Concept Filters</div>
 			<div id="promptpanel" class="panel-body" data-bind="foreach:prompts">
-				<div class="promptpanel_prompt" data-bind="click:page_model.activate_prompt">
+				<div class="promptpanel-prompt" data-bind="click:page_model.activate_prompt">
 					<span class="glyphicon glyphicon-filter"></span>
-					<span class="promptpanel_prompt_caption" data-bind="text:caption">
+					<span class="promptpanel-prompt-caption" data-bind="text:caption">
 					</span>
 				</div>
 			</div>
@@ -150,6 +171,15 @@
 		</div>
 	</div>
 
+	<div id="loading_panel" class="container text-center">
+		<div>
+			<img src="images/animated.gif">
+		</div>
+		<div>
+			LOADING
+		</div>
+	</div>
+
 	<div id="selected_concepts_container" class="container" data-bind="visible: selected_concepts().length > 0">
 		<div id="selected_concepts_panel" class="panel panel-default ">
 			<div class="panel-heading">
@@ -179,13 +209,13 @@
             options: {
 												orderClasses: false,
 												deferRender: true,
-                        aoColumns: [
-														{ sTitle: 'Concept Id', mData: 'CONCEPT_ID'},
-														{ sTitle: 'Concept Code', mData: 'CONCEPT_CODE'},
-                            { sTitle: 'Concept Name', mData: 'CONCEPT_NAME', mRender: link_renderer},
-                            { sTitle: 'Class', mData: 'CONCEPT_CLASS_ID' },
-                            { sTitle: 'Domain', mData: 'DOMAIN_ID' },
-														{ sTitle: 'Vocabulary', mData: 'VOCABULARY_ID' }
+                        columns: [
+														{ title: 'Concept Id', data: 'CONCEPT_ID'},
+														{ title: 'Concept Code', data: 'CONCEPT_CODE'},
+                            { title: 'Concept Name', data: 'CONCEPT_NAME', mRender: link_renderer},
+                            { title: 'Class', data: 'CONCEPT_CLASS_ID' },
+                            { title: 'Domain', data: 'DOMAIN_ID' },
+														{ title: 'Vocabulary', data: 'VOCABULARY_ID' }
                         ]
                     }
         }">
@@ -235,7 +265,7 @@
 					<div class="searchpanel_concept_hotkey" data-bind="text: $root.add_concept_hotkey($index() + 1)">
 					</div>
 					<div class="searchpanel_concept_name ">
-						<span data-bind="text:CONCEPT_NAME "></span>
+						<span data-bind="text:CONCEPT_NAME, attr: { class: INVALID_REASON == 'Valid' ? '' : 'invalid' } " ></span>
 					</div>
 					<div>
 						<span class="searchpanel_concept_facet_info" data-bind="text:VOCABULARY_ID "></span>

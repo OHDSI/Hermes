@@ -1,0 +1,33 @@
+/* Bootstrap overrides */
+nav {
+	min-width: 480px;
+	margin-bottom: 7px;
+}
+.navbar-brand {
+	padding: 0px 10px 0px 0px;
+	line-height: 57px;
+}
+.dropdown-menu {
+	padding-top: 0px;
+	padding-bottom:0px;
+}
+.navbar-brand img {
+	margin-top: -7px;
+}
+input[type=text].navbar-input {
+	width: 300px;
+	height: 30px;
+	line-height: 30px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.panel-heading {
+	padding: 5px 15px;
+	line-height: 30px;
+}
+.badge {
+	border-radius: 5px;
+}
+a {
+	color: #428bca;
+}
