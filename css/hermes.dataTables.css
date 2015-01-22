@@ -12,27 +12,27 @@ table.dataTable.display tbody tr.odd {
 }
 table.dataTable.stripe tbody tr.odd.selected,
 table.dataTable.display tbody tr.odd.selected {
-	background-color: #F7F780;
+	background-color: #f0f0f0;
 }
 table.dataTable.stripe tbody tr.even.selected,
 table.dataTable.display tbody tr.even.selected {
-	background-color: #F7F700;
+	background-color: #ffffff;
 }
 table.dataTable.hover tbody tr:hover.selected,
 table.dataTable.hover tbody tr.odd:hover.selected {
-	background-color: #F7F780;
+	background-color: #f0f0f0;
 }
 table.dataTable.hover tbody tr:hover.selected,
 table.dataTable.hover tbody tr.even:hover.selected {
-	background-color: #F7F700;
+	background-color: #ffffff;
 }
 table.dataTable.hover tbody tr:hover td,
 table.dataTable.hover tbody tr.odd:hover {
-	border-bottom: solid 1px #F7F780;
+	border-bottom: solid 1px #f0f0f0;
 }
 table.dataTable.hover tbody tr:hover td,
 table.dataTable.hover tbody tr.even:hover {
-	border-bottom: solid 1px #F7F700;
+	border-bottom: solid 1px #ffffff;
 }
 /* override default hover colors */
 

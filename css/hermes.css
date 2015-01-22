@@ -9,8 +9,7 @@ body {
 	margin-top: 8px;
 }
 #topnavigation .glyphicon-cog {
-	font-size:1.4em;
-	color:#4AC3FF;
+	color: #4AC3FF;
 }
 #querytext {
 	float: right;
@@ -35,7 +34,7 @@ body {
 #loading_panel {
 	padding: 50px;
 	color: #888;
-	display:none;
+	display: none;
 }
 .promptpanel-prompt {
 	background-color: #428bca;
@@ -118,7 +117,7 @@ table.dataTable {
 	color: #4AC3FF;
 }
 #filterpanel {
-	color: #fff;
+	background-color: #efefef;
 }
 #filterpanel_container {
 	color: #222;
@@ -148,19 +147,18 @@ table.dataTable {
 	color: #eee;
 	font-size: .8em;
 	cursor: help;
+	margin: 2px;
+	white-space: nowrap;
 }
 .conceptpanel_concept_details.invalid {
 	background-color: #C05050;
 }
-
 .searchpanel_concept_name .invalid {
-	color:#C05050;
+	color: #C05050;
 }
-
 a.invalid {
-	color:#C05050;
+	color: #C05050;
 }
-
 .searchpanel_concept {
 	color: #ccc;
 	padding: 3px;
@@ -239,4 +237,14 @@ a.invalid {
 .service-info {
 	color: #888;
 	font-size: .8em;
+}
+tr .glyphicon-ok-sign {
+	color: #ccc;
+	cursor: pointer;
+}
+tr.selected .glyphicon-ok-sign {
+	color: #4AC3FF;
+}
+.active .glyphicon {
+	color: #4AC3FF;
 }

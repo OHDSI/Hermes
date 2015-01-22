@@ -1,10 +1,14 @@
 var ohdsi_services = [
 	{
-		name: 'Public',
-		url: 'http://54.84.95.238:2020/WebAPI/'
+		name: 'Local',
+		url: 'http://localhost:8084/WebAPI/'
 	},
 	{
-		name: 'YOUR ENVIRONMENT',
-		url: 'http://YOURSERVER/WebAPI/'
+		name: 'HIX',
+		url: 'http://hix.jnj.com:8080/WebAPI/'
+	},
+	{
+		name: 'Public',
+		url: 'http://54.84.95.238:2020/WebAPI/'
 	}
 ];

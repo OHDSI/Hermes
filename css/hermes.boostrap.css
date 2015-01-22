@@ -27,7 +27,12 @@ input[type=text].navbar-input {
 }
 .badge {
 	border-radius: 5px;
+	font-size: 1.0em;
+	font-weight:normal;
 }
 a {
 	color: #428bca;
+}
+.glyphicon {
+	font-size:1.4em;
 }
