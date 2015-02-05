@@ -13,16 +13,21 @@
 	<link rel="stylesheet" type="text/css" href="css/hermes.css" />
 	<link rel="stylesheet" type="text/css" href="css/hermes.boostrap.css" />
 	<link rel="stylesheet" type="text/css" href="css/hermes.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="css/chart.css" />
 
 	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/knockout-3.1.0.js"></script>
 	<script type="text/javascript" src="js/knockout.dataTables.binding.js"></script>
+	<script type="text/javascript" src="js/knockout.lineChart.binding.js"></script>
 	<script type="text/javascript" src="js/director.min.js"></script>
 	<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
 	<script type="text/javascript" src="js/jquery.dataTables.colVis.min.js"></script>
 	<script type="text/javascript" src="js/jnj.facets.js"></script>
 	<script type="text/javascript" src="js/jnj.facets.prompts.js"></script>
+	<script type="text/javascript" src="js/d3.min.js"></script>
+	<script type="text/javascript" src="js/d3.tip.js"></script>
+	<script type="text/javascript" src="js/jnj.chart.js"></script>
 	<script type="text/javascript" src="js/config.js"></script>
 	<script type="text/javascript" src="js/hermes.js"></script>
 </head>
@@ -93,6 +98,15 @@
 				</div>
 			</div>
 			<div class="panel-body">
+
+				<div id="testing" class="panel panel-default" data-bind="if:data.monthlyConditionPrevalence, visible:data.monthlyConditionPrevalence">
+					<div class="panel-heading">
+						Monthly Condition Prevalance
+					</div>
+					<div data-bind="lineChart: data.monthlyConditionPrevalence" class="panel-body">
+					</div>
+				</div>
+
 				<div id="tablepanel" data-bind="if: fe_related">
 					<div class="panel panel-default">
 						<div class="panel-heading">

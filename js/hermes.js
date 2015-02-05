@@ -13,6 +13,10 @@ $(document).ready(function () {
 	$.support.cors = true;
 
 	page_model = {
+		data: {
+			monthlyConditionPrevalence: ko.observable(),
+			monthlyConditionEraPrevalence: ko.observable()
+		},
 		ohdsi_services: ko.observableArray(ohdsi_services),
 		ohdsi_service: ko.observable(ohdsi_services[0].url),
 		current_facet: ko.observable(),
@@ -42,7 +46,7 @@ $(document).ready(function () {
 
 			$('#button_basic_filter').addClass('active');
 		},
-		clearPrompts: function() {
+		clearPrompts: function () {
 			page_model.fe_related().SetFilter([]);
 			page_model.related_concepts(page_model.fe_related().GetCurrentObjects());
 			page_model.fe_related(page_model.fe_related());
@@ -59,14 +63,14 @@ $(document).ready(function () {
 		clearSelectedConcepts: function () {
 			$($('#dt_related').DataTable().rows().nodes()).removeClass('selected');
 		},
-		saveCurrentConcept: function() {
+		saveCurrentConcept: function () {
 			var concept = page_model.current_concept();
-				if (page_model.selected_concepts_index[concept.CONCEPT_ID] == 1) {
-					// already in the bag
-				} else {
-					page_model.selected_concepts_index[concept.CONCEPT_ID] = 1;
-					page_model.selected_concepts.push(concept);
-				}
+			if (page_model.selected_concepts_index[concept.CONCEPT_ID] == 1) {
+				// already in the bag
+			} else {
+				page_model.selected_concepts_index[concept.CONCEPT_ID] = 1;
+				page_model.selected_concepts.push(concept);
+			}
 		},
 		saveSelectedConcepts: function () {
 			var new_concepts = $('#dt_related').DataTable().rows('.selected', {
@@ -84,7 +88,7 @@ $(document).ready(function () {
 			}
 			page_model.selected_concepts(unwrapped);
 		},
-		removeSelectedConcepts: function() {
+		removeSelectedConcepts: function () {
 			var selected_concepts = $('#dt_selected').DataTable().rows('.selected', {
 				'search': 'applied'
 			}).data();
@@ -93,7 +97,9 @@ $(document).ready(function () {
 				delete page_model.selected_concepts_index[selected_concepts[i].CONCEPT_ID];
 			}
 
-			page_model.selected_concepts.remove(function(i) { return selected_concepts.indexOf(i) > -1; })
+			page_model.selected_concepts.remove(function (i) {
+				return selected_concepts.indexOf(i) > -1;
+			})
 			page_model.generated_codeset(null);
 		},
 		removeAllSelectedConcepts: function () {
@@ -430,6 +436,33 @@ function search(query) {
 	});
 }
 
+function mapMonthYearDataToSeries(data, options) {
+	var defaults = {
+		dateField: "x",
+		yValue: "y",
+		yPercent: "p"
+	};
+
+	var options = $.extend({}, defaults, options);
+
+	var series = {};
+	series.name = "All Time";
+	series.values = [];
+	for (var i = 0; i < data[options.dateField].length; i++) {
+		var dateInt = data[options.dateField][i];
+		series.values.push({
+			xValue: new Date(Math.floor(data[options.dateField][i] / 100), (data[options.dateField][i] % 100) - 1, 1),
+			yValue: data[options.yValue][i],
+			yPercent: data[options.yPercent][i]
+		});
+	}
+	series.values.sort(function (a, b) {
+		return a.xValue - b.xValue;
+	});
+
+	return [series]; // return series wrapped in an array
+}
+
 function loadConcept(concept_id) {
 	$('#welcome_panel_container').hide();
 
@@ -442,9 +475,33 @@ function loadConcept(concept_id) {
 
 	concept_hotkey_mode = false;
 
-	var concept_promise = $.getJSON(page_model.ohdsi_service() + 'vocabulary/concept/' + concept_id, function (c) {
-		page_model.current_concept(c);
-		$('#concept_panel_container').fadeIn();
+	var concept_promise = $.ajax({
+		url: page_model.ohdsi_service() + 'vocabulary/concept/' + concept_id,
+		method: 'GET',
+		contentType: 'application/json',
+		success: function (c,status,xhr) {
+			page_model.current_concept(c);
+			$('#concept_panel_container').fadeIn();
+		}
+	});
+
+	var data_promise = 	$.ajax({
+		url: page_model.ohdsi_service() + 'cdmresults/' + concept_id + '/monthlyConditionOccurrencePrevalence',
+		async: false,
+		method: 'GET',
+		contentType: 'application/json',
+		success: function (data) {
+			if (data.monthKey.length > 0) {
+				var byMonthSeries = mapMonthYearDataToSeries(data, {
+					dateField: 'monthKey',
+					yValue: 'prevalence',
+					yPercent: 'prevalence'
+				});
+				page_model.data.monthlyConditionPrevalence(byMonthSeries);
+			} else {
+				page_model.data.monthlyConditionPrevalence(null);
+			}
+		}
 	});
 
 	var related_promise = $.getJSON(page_model.ohdsi_service() + 'vocabulary/concept/' + concept_id + '/related', function (related) {
@@ -520,7 +577,7 @@ function loadConcept(concept_id) {
 	});
 
 	// triggers once our async loading of the concept and related concepts is complete
-	$.when(related_promise, concept_promise).done(function () {
+	$.when(related_promise, concept_promise, data_promise).done(function () {
 		$('.conceptpanel_concept_details').tooltip();
 		var prompts = prompter.get_prompts(page_model.current_concept(), page_model.fe_related());
 		page_model.prompts(prompts);
