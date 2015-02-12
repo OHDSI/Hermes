@@ -63,13 +63,28 @@ $(document).ready(function () {
 		clearSelectedConcepts: function () {
 			$($('#dt_related').DataTable().rows().nodes()).removeClass('selected');
 		},
+		createConceptSetItem: function(concept) {
+				var conceptSetItem = {};
+				conceptSetItem.concept = {
+					conceptId : concept.CONCEPT_ID,
+					conceptName : concept.CONCEPT_NAME,
+					conceptCode : concept.CONCEPT_CODE,
+					vocabularyId : concept.VOCABULARY_ID,
+					domainId: concept.DOMAIN_ID
+				};
+
+				conceptSetItem.isExcluded = ko.observable(false);
+			 	conceptSetItem.includeDescendants = ko.observable(false);
+				conceptSetItem.includeMapped = ko.observable(false);
+			return conceptSetItem;
+		},
 		saveCurrentConcept: function () {
 			var concept = page_model.current_concept();
 			if (page_model.selected_concepts_index[concept.CONCEPT_ID] == 1) {
 				// already in the bag
 			} else {
 				page_model.selected_concepts_index[concept.CONCEPT_ID] = 1;
-				page_model.selected_concepts.push(concept);
+				page_model.selected_concepts.push(page_model.createConceptSetItem(concept));
 			}
 		},
 		saveSelectedConcepts: function () {
@@ -83,18 +98,19 @@ $(document).ready(function () {
 					// already in the bag
 				} else {
 					page_model.selected_concepts_index[new_concepts[i].CONCEPT_ID] = 1;
-					unwrapped.push(new_concepts[i]);
+					unwrapped.push(page_model.createConceptSetItem(new_concepts[i]));
 				}
 			}
 			page_model.selected_concepts(unwrapped);
 		},
 		removeSelectedConcepts: function () {
-			var selected_concepts = $('#dt_selected').DataTable().rows('.selected', {
+			var rows = $('#dt_selected tr>td>span.selected').closest('tr');
+			var selected_concepts = $('#dt_selected').DataTable().rows(rows, {
 				'search': 'applied'
 			}).data();
 
 			for (var i = 0; i < selected_concepts.length; i++) {
-				delete page_model.selected_concepts_index[selected_concepts[i].CONCEPT_ID];
+				delete page_model.selected_concepts_index[selected_concepts[i].concept.conceptId];
 			}
 
 			page_model.selected_concepts.remove(function (i) {
@@ -107,15 +123,41 @@ $(document).ready(function () {
 			page_model.generated_codeset(null);
 			page_model.selected_concepts.removeAll();
 		},
-		generateCodeset: function () {
+		generateConceptIdList: function () {
 			var comma_separated_codeset = '';
 			for (var i = 0; i < page_model.selected_concepts().length; i++) {
 				if (i > 0) {
 					comma_separated_codeset += ', ';
 				}
-				comma_separated_codeset += page_model.selected_concepts()[i].CONCEPT_ID;
+				comma_separated_codeset += page_model.selected_concepts()[i].concept.conceptId;
 			}
 			page_model.generated_codeset(comma_separated_codeset);
+		},
+		generateConceptList: function () {
+			var json = ko.toJSON(page_model.selected_concepts(), undefined, 2);
+			json = this.syntaxHighlight(json);
+			page_model.generated_codeset(json);
+		},
+		syntaxHighlight: function (json) {
+			if (typeof json != 'string') {
+				json = JSON.stringify(json, undefined, 2);
+			}
+			json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+				var cls = 'number';
+				if (/^"/.test(match)) {
+					if (/:$/.test(match)) {
+						cls = 'key';
+					} else {
+						cls = 'string';
+					}
+				} else if (/true|false/.test(match)) {
+					cls = 'boolean';
+				} else if (/null/.test(match)) {
+					cls = 'null';
+				}
+				return '<span class="' + cls + '">' + match + '</span>';
+			});
 		},
 		updateFilters: function () {
 			$(event.target).toggleClass('selected');
@@ -236,11 +278,12 @@ $(document).ready(function () {
 		'/concept/:concept_id:': loadConcept
 	}
 
+
 	$(document).on('click', '#dt_related tr', function () {
 		$(this).toggleClass('selected');
 	});
 
-	$(document).on('click', '#dt_selected tr', function () {
+  $(document).on('click', '#dt_selected > tbody > tr > td > span.glyphicon-ok-sign', function () {
 		$(this).toggleClass('selected');
 	});
 
@@ -356,8 +399,16 @@ function renderLink(s, p, d) {
 	return '<a class="' + valid + '" href=\"#/concept/' + d.CONCEPT_ID + '\">' + d.CONCEPT_NAME + '</a>';
 }
 
+function renderBoundLink(s,p,d) {
+	return '<a href=\"#/concept/' + d.concept.conceptId + '\">' + d.concept.conceptName + '</a>';
+}
+
 function renderSelected(s, p, d) {
 	return '<span class="glyphicon glyphicon-ok-sign"></span>';
+}
+
+function renderCheckbox(field) {
+	return '<span data-bind="click: function(d) { d.' + field + '(!d.' + field + '()); } ,css: { selected: ' + field + '} " class="glyphicon glyphicon-ok"></span>';
 }
 
 function resetSearchPanel() {
@@ -430,7 +481,7 @@ function search(query) {
 		},
 		error: function (xhr, message) {
 			$('#searchpanel_searching').hide();
-			$('#searchpanel_error').html('An error occurred while attempting to run a search.  The most likely cause of this error is that the WebAPI layer was not available.');
+			$('#searchpanel_error').html('An error occurred while attempting to run a search.  The most likely cause of this error is that the selected WebAPI layer was not available.');
 			$('#searchpanel_error').show()
 		}
 	});
@@ -479,13 +530,13 @@ function loadConcept(concept_id) {
 		url: page_model.ohdsi_service() + 'vocabulary/concept/' + concept_id,
 		method: 'GET',
 		contentType: 'application/json',
-		success: function (c,status,xhr) {
+		success: function (c, status, xhr) {
 			page_model.current_concept(c);
 			$('#concept_panel_container').fadeIn();
 		}
 	});
 
-	var data_promise = 	$.ajax({
+	var data_promise = $.ajax({
 		url: page_model.ohdsi_service() + 'cdmresults/' + concept_id + '/monthlyConditionOccurrencePrevalence',
 		async: false,
 		method: 'GET',

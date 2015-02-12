@@ -215,7 +215,7 @@
 		<div id="selected_concepts_panel" class="panel panel-default ">
 			<div class="panel-heading">
 				<div class="btn-toolbar">
-					<span>Saved Concepts</span>
+					<span>Concept Set</span>
 
 					<div class="dropdown btn-group pull-right" title="Remove">
 						<button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="button_selected_remove" data-toggle="dropdown" aria-expanded="true">
@@ -229,12 +229,14 @@
 						</ul>
 					</div>
 
-					<div class="dropdown btn-group pull-right" title="Generate">
+					<div class="dropdown btn-group pull-right" title="Export">
 						<button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="button_selected_remove" data-toggle="dropdown" aria-expanded="true">
-							<span class="glyphicon glyphicon-flash"></span>
+							<span class="glyphicon glyphicon-export"></span>
 						</button>
 						<ul class="dropdown-menu dropdown-menu-right" role="menu">
-							<li role="presentation"><a href="javascript:page_model.generateCodeset();" role="menuitem" tabindex="-1">Generate Code Set</a>
+							<li role="presentation"><a href="javascript:page_model.generateConceptIdList();" role="menuitem" tabindex="-1">Export Concept Id List</a>
+							</li>
+							<li role="presentation"><a href="javascript:page_model.generateConceptList();" role="menuitem" tabindex="-1">Export Concept Set (JSON)</a>
 							</li>
 						</ul>
 					</div>
@@ -244,26 +246,29 @@
 				<table id="dt_selected" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
             data: page_model.selected_concepts(),
             options: {
-												orderClasses: false,
-												deferRender: true,
-                        columns: [
-														{ title: '', render: renderSelected, orderable:false, searchable:false},
-														{ title: 'Concept Id', data: 'CONCEPT_ID'},
-														{ title: 'Concept Code', data: 'CONCEPT_CODE'},
-                            { title: 'Concept Name', data: 'CONCEPT_NAME', mRender: renderLink},
-                            { title: 'Class', data: 'CONCEPT_CLASS_ID' },
-                            { title: 'Domain', data: 'DOMAIN_ID' },
-														{ title: 'Vocabulary', data: 'VOCABULARY_ID' }
-                        ]
-                    }
+							orderClasses: false,
+							deferRender: true,
+							order: [[3, 'desc']],
+              columns: [
+									{ title: '', render: renderSelected, orderable:false, searchable:false},
+									{ title: 'Concept Id', data: 'concept.conceptId'},
+									{ title: 'Concept Code', data: 'concept.conceptCode'},
+                  { title: 'Concept Name', data: 'concept.conceptName', render: renderBoundLink},
+                  { title: 'Domain', data: 'concept.domainId' },
+									{ title: 'Vocabulary', data: 'concept.vocabularyId' },
+									{ title: 'Exclude', class:'text-center', orderable:false,render: function() { return renderCheckbox('isExcluded');} },
+									{ title: 'Descendants', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeDescendants');} },
+									{ title: 'Mapped', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeMapped');} }
+              ]
+           }
         }">
 				</table>
 
 				<div id="generated_codeset_container" data-bind="if:generated_codeset">
 					<div class="panel panel-default">
-						<div class="panel-heading">Generated Codeset</div>
+						<div class="panel-heading">Export</div>
 						<div class="panel-body">
-							<samp data-bind="text: generated_codeset"></samp>
+							<pre data-bind="html: generated_codeset"></pre>
 						</div>
 					</div>
 				</div>
@@ -295,7 +300,7 @@
 					Page <span data-bind="text: $root.current_page() + 1"></span> / <span data-bind="text: $root.total_pages"></span>
 				</div>
 				<div id="paging_controls">
-					<span class="span_link" onclick="page_model.previousPage();">&lt;&lt; Previous</span>  <span class="span_link" onclick="page_model.nextPage();">Next &gt;&gt;</span>
+					<span class="span_link" onclick="page_model.previousPage();">&lt;&lt; Previous</span> <span class="span_link" onclick="page_model.nextPage();">Next &gt;&gt;</span>
 				</div>
 			</div>
 			<div id="searchpanel_results " data-bind="foreach:current_page_concepts ">

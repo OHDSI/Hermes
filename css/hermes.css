@@ -228,6 +228,12 @@ a.invalid {
 #generated_codeset_container {
 	margin-top: 10px;
 }
+#generated_codeset_container pre {
+	font-size:10px;
+}
+#generated_codeset_container pre span.key {
+	color:#428bca;
+}
 .service-name {
 	font-weight: bold;
 }
@@ -243,6 +249,16 @@ tr .glyphicon-ok-sign {
 	cursor: pointer;
 }
 tr.selected .glyphicon-ok-sign {
+	color: #4AC3FF;
+}
+.glyphicon-ok-sign.selected {
+	color: #4AC3FF;
+}
+.glyphicon-ok {
+	cursor:pointer;
+	color: #ccc;
+}
+.glyphicon-ok.selected {
 	color: #4AC3FF;
 }
 .active .glyphicon {

@@ -6,8 +6,16 @@
 					// If the binding is an object with an options field,
 					// initialise the dataTable with those options.
 					if (binding.options) {
+						// allow row level binding context
+						binding.options.createdRow = function (row, data, index) {
+							ko.applyBindings(data, row)
+						};
+
 						$(element).dataTable(binding.options);
 					}
+					return {
+						controlsDescendantBindings: true
+					};
 				},
 				update: function (element, valueAccessor) {
 					var binding = ko.utils.unwrapObservable(valueAccessor());
