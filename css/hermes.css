@@ -5,37 +5,54 @@ body {
 	margin-left: 0px;
 	margin-right: 0px;
 }
+
+#panel-warnings {
+	margin-top:10px;
+}
+
 #topnavigation .input-group {
 	margin-top: 8px;
 }
+
 #topnavigation .glyphicon-cog {
 	color: #4AC3FF;
 }
+
+#topnavigation .glyphicon-cog.warning {
+	color: rgb(255, 68, 0);
+}
+
 #querytext {
 	float: right;
 	width: 200px;
 }
+
 #querytext:focus {
 	outline: none;
 }
+
 #welcome_panel_container {
 	margin-top: 100px;
 }
+
 #promptpanel {
 	font-size: .9em;
 	margin-top: 7px;
 	color: #fff;
 	position: relative;
 }
+
 #searchhint {
 	margin-top: 20px;
 	color: #007ACC;
 }
+
 #loading_panel {
 	padding: 50px;
 	color: #888;
 	display: none;
 }
+
 .promptpanel-prompt {
 	background-color: #428bca;
 	margin-bottom: 3px;
@@ -43,19 +60,26 @@ body {
 	padding: 3px;
 	line-height: 26px;
 }
-.promptpanel-prompt:hover {} .promptpanel_prompt.selected {
+
+.promptpanel-prompt:hover {}
+
+.promptpanel_prompt.selected {
 	color: #4AC3FF;
 }
+
 .promptpanel-prompt .glyphicon {
 	top: 3px;
 	padding-left: 3px;
 }
+
 table.dataTable {
 	font-size: .9em;
 }
+
 .dataTables_wrapper .dataTables_paginate .paginate_button {
 	padding: 3px 7px 3px 7px;
 }
+
 #search_panel_container {
 	position: absolute;
 	top: 51px;
@@ -67,12 +91,14 @@ table.dataTable {
 	overflow-y scroll;
 	overflow-x: hidden;
 }
+
 #searchpanel_searching {
 	display: none;
 	padding: 7px;
 	margin: 3px;
 	color: #eee;
 }
+
 #searchpanel_error {
 	font-family: Courier New;
 	font-size: 12px;
@@ -80,26 +106,31 @@ table.dataTable {
 	color: #fee;
 	margin: 7px;
 }
+
 #paging_container {
 	position: relative;
 	height: 25px;
 	color: #ccc;
 }
+
 #paging_controls {
 	position: absolute;
 	right: 7px;
 	top: 3px;
 }
+
 #paging_info {
 	position: absolute;
 	left: 7px;
 	top: 3px;
 }
+
 #concept_panel_container {
 	padding-top: 10px;
 	position: relative;
 	margin-bottom: 10px;
 }
+
 .toggle_control {
 	position: float;
 	float: right;
@@ -113,34 +144,44 @@ table.dataTable {
 	text-align: center;
 	cursor: pointer;
 }
+
 .toggle_control.selected {
 	color: #4AC3FF;
 }
+
 #filterpanel {
 	background-color: #efefef;
 }
+
 #filterpanel_container {
 	color: #222;
 	padding: 7px;
 }
-#filterpanel_filters {} .conceptpanel_concept_name {
+
+#filterpanel_filters {}
+
+.conceptpanel_concept_name {
 	font-size: 1.4em;
 	color: #20425A;
 }
+
 .filterpanel_facet_name {
 	font-weight: bold;
 	border-bottom: solid 1px #444;
 	margin: 5px 1px 3px 1px;
 }
+
 .filterpanel_facet_member_name {
 	font-size: .8em;
 	line-height: 18px;
 	cursor: pointer;
 }
+
 .filterpanel_facet_member_name.selected {
 	color: #3AB8F9;
 	font-weight: bold;
 }
+
 .conceptpanel_concept_details {
 	background-color: #505050;
 	padding: 2px 7px 2px 7px;
@@ -150,25 +191,31 @@ table.dataTable {
 	margin: 2px;
 	white-space: nowrap;
 }
+
 .conceptpanel_concept_details.invalid {
 	background-color: #C05050;
 }
+
 .searchpanel_concept_name .invalid {
 	color: #C05050;
 }
+
 a.invalid {
 	color: #C05050;
 }
+
 .searchpanel_concept {
 	color: #ccc;
 	padding: 3px;
 	color: #fff;
 	position: relative;
 }
+
 .searchpanel_concept:hover {
 	background-color: #666;
 	cursor: pointer;
 }
+
 #searchpanel_current_facet {
 	color: #fff;
 	font-size: 1.2em;
@@ -176,6 +223,7 @@ a.invalid {
 	margin-left: 3px;
 	font-weight: bold;
 }
+
 .searchpanel_concept_hotkey {
 	color: #4AC3FF;
 	font-size: 1.2em;
@@ -185,6 +233,7 @@ a.invalid {
 	width: 20px;
 	text-align: center;
 }
+
 .searchpanel_facet_hotkey {
 	color: #4AC3FF;
 	font-size: 1.2em;
@@ -194,73 +243,100 @@ a.invalid {
 	width: 20px;
 	text-align: center;
 }
+
 .searchpanel_concept_name {
 	text-decoration: none;
 	margin-left: 25px;
 }
+
 .searchpanel_facets_facet {
 	cursor: pointer;
 	position: relative;
 }
+
 .searchpanel_facets_facet:hover {
 	background-color: #666;
 }
+
 .searchpanel_concept_facet_info {
 	color: #ccc;
 	font-size: .8em;
 	margin-left: 25px;
 }
+
 .searchpanel_facet_member {
 	padding: 3px;
 	margin-left: 25px;
 	color: #fff;
 }
+
 .searchpanel_facet_percent {
 	height: 5px;
 	background-color: #4AC3FF;
 }
+
 .span_link {
 	text-decoration: underline;
 	color: #4AC3FF;
 	cursor: pointer;
 	user-select: none;
 }
+
 #generated_codeset_container {
 	margin-top: 10px;
 }
+
 #generated_codeset_container pre {
-	font-size:10px;
+	font-size: 10px;
 }
+
 #generated_codeset_container pre span.key {
-	color:#428bca;
+	color: #428bca;
 }
+
 .service-name {
 	font-weight: bold;
 }
+
 .service-name .glyphicon-ok-sign {
 	color: #4AC3FF;
 }
+
+.service-name .glyphicon-ok-sign.warning {
+	color: rgb(255, 68, 0);
+}
+
+.warning {
+	color: rgb(255, 68, 0);
+}
+
 .service-info {
 	color: #888;
 	font-size: .8em;
 }
+
 tr .glyphicon-ok-sign {
 	color: #ccc;
 	cursor: pointer;
 }
+
 tr.selected .glyphicon-ok-sign {
 	color: #4AC3FF;
 }
+
 .glyphicon-ok-sign.selected {
 	color: #4AC3FF;
 }
+
 .glyphicon-ok {
-	cursor:pointer;
+	cursor: pointer;
 	color: #ccc;
 }
+
 .glyphicon-ok.selected {
 	color: #4AC3FF;
 }
+
 .active .glyphicon {
 	color: #4AC3FF;
 }

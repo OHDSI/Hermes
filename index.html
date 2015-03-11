@@ -43,7 +43,7 @@
 				<input type="text" class="form-control" id="querytext" placeholder="Search">
 				<div class="input-group-btn">
 					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-						<span class="glyphicon glyphicon-cog"></span>
+						<span id="configuration-cog" class="glyphicon glyphicon-cog"></span>
 					</button>
 					<button id="button_shopping_cart" type="button" class="btn btn-default">
 						<div class="glyphicon glyphicon-shopping-cart" data-bind="visible:selected_concepts().length == 0"></div>
@@ -54,7 +54,7 @@
 							<a href="#" data-bind="click: $root.updateService">
 								<div class="service-name">
 									<span data-bind="text: name"></span>
-									<span data-bind="visible: url == $root.ohdsi_service()" class="glyphicon glyphicon-ok-sign"></span>
+									<span data-bind="visible: url == $root.ohdsi_service(), css: { warning: version == 'unknown' }" class="glyphicon glyphicon-ok-sign"></span>
 								</div>
 								<div class="service-info" data-bind="text:'Vocabulary ' + version + ' (' + dialect + ')'"></div>
 							</a>
@@ -88,11 +88,12 @@
 								<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_ID " title="Concept Identifier"></span>
 								<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CLASS_ID " title="Class"></span>
 								<span class="conceptpanel_concept_details" data-bind="text:INVALID_REASON, attr: { class: INVALID_REASON == 'Valid' ? 'conceptpanel_concept_details' : 'conceptpanel_concept_details invalid'} " title="Invalid Reason"></span>
+								<span class="conceptpanel_concept_details" data-bind="text:STANDARD_CONCEPT, attr: { class: STANDARD_CONCEPT == 'Standard' ? 'conceptpanel_concept_details' : 'conceptpanel_concept_details invalid'} " title="Standard Concept"></span>
 							</div>
 						</div>
 					</div>
 					<div class="col-md-1">
-						<button onclick="page_model.saveCurrentConcept();" title="Save to Selections" class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-save"></span>
+						<button onclick="pageModel.saveCurrentConcept();" title="Save to Selections" class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-save"></span>
 						</button>
 					</div>
 				</div>
@@ -124,19 +125,19 @@
 											<ul class="dropdown-menu dropdown-menu-right" role="menu">
 												<!-- ko foreach: prompts -->
 												<li role="presentation">
-													<a href="#" data-bind="click:page_model.activatePrompt, text:caption" role="menuitem" tabindex="-1"></a>
+													<a href="#" data-bind="click:pageModel.activatePrompt, text:caption" role="menuitem" tabindex="-1"></a>
 												</li>
 												<!-- /ko -->
 												<li role="presentation">
 													<a href="#" onclick="toggleFilters();return false;" role="menuitem" tabindex="-1">Advanced Filters</a>
 												</li>
 												<li role="presentation">
-													<a href="#" onclick="page_model.clearPrompts();return false;" role="menuitem" tabindex="-1">Clear Filters</a>
+													<a href="#" onclick="pageModel.clearPrompts();return false;" role="menuitem" tabindex="-1">Clear Filters</a>
 												</li>
 											</ul>
 										</div>
 
-										<button onclick="page_model.saveSelectedConcepts();" title="Save Selections" class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-save"></span>
+										<button onclick="pageModel.saveSelectedConcepts();" title="Save Selections" class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-save"></span>
 										</button>
 
 										<div class="dropdown btn-group pull-right" title="Selections">
@@ -144,9 +145,9 @@
 												<span class="glyphicon glyphicon-ok-sign"></span>
 											</button>
 											<ul class="dropdown-menu dropdown-menu-right" role="menu">
-												<li role="presentation"><a href="javascript:page_model.selectAllConcepts();" role="menuitem" tabindex="-1">Select All</a>
+												<li role="presentation"><a href="javascript:pageModel.selectAllConcepts();" role="menuitem" tabindex="-1">Select All</a>
 												</li>
-												<li role="presentation"><a href="javascript:page_model.clearSelectedConcepts();" role="menuitem" tabindex="-1">Select None</a>
+												<li role="presentation"><a href="javascript:pageModel.clearSelectedConcepts();" role="menuitem" tabindex="-1">Select None</a>
 												</li>
 											</ul>
 										</div>
@@ -165,7 +166,7 @@
 												<div class="filterpanel_facet_name" data-bind="text:caption"></div>
 												<div class="filterpanel_facet_members" data-bind="foreach:Members">
 													<div class="col-sm-2 filterpanel_facet_member">
-														<span class="filterpanel_facet_member_name" data-bind="attr: {id: $parentContext.$index() + '-' + $index()}, click: function() { page_model.updateFilters(); }, css : {selected: Selected}, text:Name + ' (' + ActiveCount + ')'"></span>
+														<span class="filterpanel_facet_member_name" data-bind="attr: {id: $parentContext.$index() + '-' + $index()}, click: function() { pageModel.updateFilters(); }, css : {selected: Selected}, text:Name + ' (' + ActiveCount + ')'"></span>
 													</div>
 												</div>
 											</div>
@@ -175,7 +176,7 @@
 							</div>
 
 							<table id="dt_related" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
-            data: page_model.fe_related().GetCurrentObjects(),
+            data: pageModel.fe_related().GetCurrentObjects(),
             options: {
 												dom: 'Clfrtip',
 												orderClasses: false,
@@ -188,6 +189,7 @@
                             { title: 'Related Concept', data: 'CONCEPT_NAME', render: renderLink},
                             { title: 'Class', data: 'CONCEPT_CLASS_ID' },
 													  { title: 'Relationship', data: 'RELATIONSHIP_CAPTION', visible: false},
+														{ title: 'Standard Concept', data: 'STANDARD_CONCEPT', visible: false},
                             { title: 'Domain', data: 'DOMAIN_ID' },
 														{ title: 'Vocabulary', data: 'VOCABULARY_ID' }
                         ]
@@ -222,9 +224,9 @@
 							<span class="glyphicon glyphicon-remove-sign"></span>
 						</button>
 						<ul class="dropdown-menu dropdown-menu-right" role="menu">
-							<li role="presentation"><a href="javascript:page_model.removeSelectedConcepts();" role="menuitem" tabindex="-1">Remove Selected</a>
+							<li role="presentation"><a href="javascript:pageModel.removeSelectedConcepts();" role="menuitem" tabindex="-1">Remove Selected</a>
 							</li>
-							<li role="presentation"><a href="javascript:page_model.removeAllSelectedConcepts();" role="menuitem" tabindex="-1">Remove All</a>
+							<li role="presentation"><a href="javascript:pageModel.removeAllSelectedConcepts();" role="menuitem" tabindex="-1">Remove All</a>
 							</li>
 						</ul>
 					</div>
@@ -234,9 +236,9 @@
 							<span class="glyphicon glyphicon-export"></span>
 						</button>
 						<ul class="dropdown-menu dropdown-menu-right" role="menu">
-							<li role="presentation"><a href="javascript:page_model.generateConceptIdList();" role="menuitem" tabindex="-1">Export Concept Id List</a>
+							<li role="presentation"><a href="javascript:pageModel.generateConceptIdList();" role="menuitem" tabindex="-1">Export Concept Id List</a>
 							</li>
-							<li role="presentation"><a href="javascript:page_model.generateConceptList();" role="menuitem" tabindex="-1">Export Concept Set (JSON)</a>
+							<li role="presentation"><a href="javascript:pageModel.generateConceptList();" role="menuitem" tabindex="-1">Export Concept Set (JSON)</a>
 							</li>
 						</ul>
 					</div>
@@ -244,7 +246,7 @@
 			</div>
 			<div class="panel-body">
 				<table id="dt_selected" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
-            data: page_model.selected_concepts(),
+            data: pageModel.selected_concepts(),
             options: {
 							orderClasses: false,
 							deferRender: true,
@@ -255,7 +257,7 @@
 									{ title: 'Concept Code', data: 'concept.conceptCode'},
                   { title: 'Concept Name', data: 'concept.conceptName', render: renderBoundLink},
                   { title: 'Domain', data: 'concept.domainId' },
-									{ title: 'Vocabulary', data: 'concept.vocabularyId' },
+									{ title: 'Standard Concept', data: 'concept.standardConcept' },
 									{ title: 'Exclude', class:'text-center', orderable:false,render: function() { return renderCheckbox('isExcluded');} },
 									{ title: 'Descendants', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeDescendants');} },
 									{ title: 'Mapped', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeMapped');} }
@@ -263,6 +265,15 @@
            }
         }">
 				</table>
+
+				<div id="panel-warnings" class="panel panel-default" data-bind="visible: selectedConceptsWarnings().length > 0">
+					<div class="panel-heading">Concept Set Warnings</div>
+					<div class="panel-body">
+						<div data-bind="foreach:selectedConceptsWarnings">
+							<div class="alert alert-danger" role="alert" data-bind="text:$data"></div>
+						</div>
+					</div>
+				</div>
 
 				<div id="generated_codeset_container" data-bind="if:generated_codeset">
 					<div class="panel panel-default">
@@ -300,7 +311,7 @@
 					Page <span data-bind="text: $root.current_page() + 1"></span> / <span data-bind="text: $root.total_pages"></span>
 				</div>
 				<div id="paging_controls">
-					<span class="span_link" onclick="page_model.previousPage();">&lt;&lt; Previous</span> <span class="span_link" onclick="page_model.nextPage();">Next &gt;&gt;</span>
+					<span class="span_link" onclick="pageModel.previousPage();">&lt;&lt; Previous</span> <span class="span_link" onclick="pageModel.nextPage();">Next &gt;&gt;</span>
 				</div>
 			</div>
 			<div id="searchpanel_results " data-bind="foreach:current_page_concepts ">

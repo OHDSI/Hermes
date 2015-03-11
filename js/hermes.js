@@ -1,5 +1,5 @@
 var router;
-var page_model;
+var pageModel;
 var fe_search;
 var facet_hotkey_mode = false;
 var concept_hotkey_mode = false;
@@ -12,7 +12,7 @@ var hotkey_index = 0;
 $(document).ready(function () {
 	$.support.cors = true;
 
-	page_model = {
+	pageModel = {
 		data: {
 			monthlyConditionPrevalence: ko.observable(),
 			monthlyConditionEraPrevalence: ko.observable()
@@ -29,29 +29,74 @@ $(document).ready(function () {
 		total_pages: 0,
 		page_length: 9,
 		selected_concepts: ko.observableArray(),
+		selectedConceptsWarnings: ko.observableArray(),
+		analyzeSelectedConcepts: function() {
+			pageModel.selectedConceptsWarnings.removeAll();
+			var domains = [];
+			var standards = [];
+			var includeNonStandard = false;
+
+			for (var i = 0; i < pageModel.selected_concepts().length; i++) {
+				var domain = pageModel.selected_concepts()[i].concept.domainId;
+				var standard = pageModel.selected_concepts()[i].concept.standardConcept;
+
+				if (standard != 'Standard') {
+					includeNonStandard = true;
+				}
+
+				var index;
+
+				index = $.inArray(domain, domains);
+				if (index < 0) {
+					domains.push(domain);
+				}
+
+				index = $.inArray(standard, standards);
+				if (index < 0) {
+					standards.push(standard);
+				}
+
+			}
+
+			if (domains.length > 1) {
+				pageModel.selectedConceptsWarnings.push('Your saved concepts come from multiple Domains (' + domains.join(', ') + ').  A useful set of concepts will typically all come from the same Domain.');
+			}
+
+			if (standards.length > 1) {
+				pageModel.selectedConceptsWarnings.push('Your saved concepts include different standard concept types (' + standards.join(', ') + ').  A useful set of concepts will typically all be of the same standard concept type.');
+			}
+
+			if (includeNonStandard) {
+				pageModel.selectedConceptsWarnings.push('Your saved concepts include Non-Standard or Classification concepts.  Typically concept sets should only include Standard concepts unless advanced use of this concept set is planned.');
+			}
+		},
 		selected_concepts_index: {},
 		generated_codeset: ko.observable(),
 		show_advanced_filters: ko.observable(false),
 		modifier_key_down: false,
 		updateService: function (service) {
-			page_model.ohdsi_service(service.url);
-			page_model.ohdsi_services(ohdsi_services);
+			$('#configuration-cog').removeClass('warning');
+			pageModel.ohdsi_service(service.url);
+			pageModel.ohdsi_services(ohdsi_services);
+			if (service.version == 'unknown') {
+				$('#configuration-cog').addClass('warning');
+			}
 		},
 		activatePrompt: function (prompt) {
-			page_model.fe_related().SetFilter(prompt.filters);
-			page_model.related_concepts(page_model.fe_related().GetCurrentObjects());
-			page_model.fe_related(page_model.fe_related());
-			var new_prompts = prompter.get_prompts(page_model.current_concept(), page_model.fe_related());
-			page_model.prompts(new_prompts);
+			pageModel.fe_related().SetFilter(prompt.filters);
+			pageModel.related_concepts(pageModel.fe_related().GetCurrentObjects());
+			pageModel.fe_related(pageModel.fe_related());
+			var new_prompts = prompter.get_prompts(pageModel.current_concept(), pageModel.fe_related());
+			pageModel.prompts(new_prompts);
 
 			$('#button_basic_filter').addClass('active');
 		},
 		clearPrompts: function () {
-			page_model.fe_related().SetFilter([]);
-			page_model.related_concepts(page_model.fe_related().GetCurrentObjects());
-			page_model.fe_related(page_model.fe_related());
-			var new_prompts = prompter.get_prompts(page_model.current_concept(), page_model.fe_related());
-			page_model.prompts(new_prompts);
+			pageModel.fe_related().SetFilter([]);
+			pageModel.related_concepts(pageModel.fe_related().GetCurrentObjects());
+			pageModel.fe_related(pageModel.fe_related());
+			var new_prompts = prompter.get_prompts(pageModel.current_concept(), pageModel.fe_related());
+			pageModel.prompts(new_prompts);
 
 			$('#button_basic_filter').removeClass('active');
 		},
@@ -70,6 +115,7 @@ $(document).ready(function () {
 					conceptName : concept.CONCEPT_NAME,
 					conceptCode : concept.CONCEPT_CODE,
 					vocabularyId : concept.VOCABULARY_ID,
+					standardConcept : concept.STANDARD_CONCEPT,
 					domainId: concept.DOMAIN_ID
 				};
 
@@ -79,29 +125,31 @@ $(document).ready(function () {
 			return conceptSetItem;
 		},
 		saveCurrentConcept: function () {
-			var concept = page_model.current_concept();
-			if (page_model.selected_concepts_index[concept.CONCEPT_ID] == 1) {
+			var concept = pageModel.current_concept();
+			if (pageModel.selected_concepts_index[concept.CONCEPT_ID] == 1) {
 				// already in the bag
 			} else {
-				page_model.selected_concepts_index[concept.CONCEPT_ID] = 1;
-				page_model.selected_concepts.push(page_model.createConceptSetItem(concept));
+				pageModel.selected_concepts_index[concept.CONCEPT_ID] = 1;
+				pageModel.selected_concepts.push(pageModel.createConceptSetItem(concept));
 			}
+			pageModel.analyzeSelectedConcepts();
 		},
 		saveSelectedConcepts: function () {
 			var new_concepts = $('#dt_related').DataTable().rows('.selected', {
 				'search': 'applied'
 			}).data();
-			var unwrapped = page_model.selected_concepts();
+			var unwrapped = pageModel.selected_concepts();
 
 			for (var i = 0; i < new_concepts.length; i++) {
-				if (page_model.selected_concepts_index[new_concepts[i].CONCEPT_ID] == 1) {
+				if (pageModel.selected_concepts_index[new_concepts[i].CONCEPT_ID] == 1) {
 					// already in the bag
 				} else {
-					page_model.selected_concepts_index[new_concepts[i].CONCEPT_ID] = 1;
-					unwrapped.push(page_model.createConceptSetItem(new_concepts[i]));
+					pageModel.selected_concepts_index[new_concepts[i].CONCEPT_ID] = 1;
+					unwrapped.push(pageModel.createConceptSetItem(new_concepts[i]));
 				}
 			}
-			page_model.selected_concepts(unwrapped);
+			pageModel.selected_concepts(unwrapped);
+			pageModel.analyzeSelectedConcepts();
 		},
 		removeSelectedConcepts: function () {
 			var rows = $('#dt_selected tr>td>span.selected').closest('tr');
@@ -110,33 +158,35 @@ $(document).ready(function () {
 			}).data();
 
 			for (var i = 0; i < selected_concepts.length; i++) {
-				delete page_model.selected_concepts_index[selected_concepts[i].concept.conceptId];
+				delete pageModel.selected_concepts_index[selected_concepts[i].concept.conceptId];
 			}
 
-			page_model.selected_concepts.remove(function (i) {
+			pageModel.selected_concepts.remove(function (i) {
 				return selected_concepts.indexOf(i) > -1;
 			})
-			page_model.generated_codeset(null);
+			pageModel.generated_codeset(null);
+			pageModel.analyzeSelectedConcepts();
 		},
 		removeAllSelectedConcepts: function () {
-			page_model.selected_concepts_index = {};
-			page_model.generated_codeset(null);
-			page_model.selected_concepts.removeAll();
+			pageModel.selected_concepts_index = {};
+			pageModel.generated_codeset(null);
+			pageModel.selected_concepts.removeAll();
+			pageModel.analyzeSelectedConcepts();
 		},
 		generateConceptIdList: function () {
 			var comma_separated_codeset = '';
-			for (var i = 0; i < page_model.selected_concepts().length; i++) {
+			for (var i = 0; i < pageModel.selected_concepts().length; i++) {
 				if (i > 0) {
 					comma_separated_codeset += ', ';
 				}
-				comma_separated_codeset += page_model.selected_concepts()[i].concept.conceptId;
+				comma_separated_codeset += pageModel.selected_concepts()[i].concept.conceptId;
 			}
-			page_model.generated_codeset(comma_separated_codeset);
+			pageModel.generated_codeset(comma_separated_codeset);
 		},
 		generateConceptList: function () {
-			var json = ko.toJSON(page_model.selected_concepts(), undefined, 2);
+			var json = ko.toJSON(pageModel.selected_concepts(), undefined, 2);
 			json = this.syntaxHighlight(json);
-			page_model.generated_codeset(json);
+			pageModel.generated_codeset(json);
 		},
 		syntaxHighlight: function (json) {
 			if (typeof json != 'string') {
@@ -166,24 +216,24 @@ $(document).ready(function () {
 			$('.selected.filterpanel_facet_member_name').each(function (i, d) {
 				filters.push(d.id);
 			});
-			page_model.fe_related().SetFilter(filters);
-			page_model.related_concepts(page_model.fe_related().GetCurrentObjects());
-			page_model.fe_related(page_model.fe_related());
-			var new_prompts = prompter.get_prompts(page_model.current_concept(), page_model.fe_related());
-			page_model.prompts(new_prompts);
+			pageModel.fe_related().SetFilter(filters);
+			pageModel.related_concepts(pageModel.fe_related().GetCurrentObjects());
+			pageModel.fe_related(pageModel.fe_related());
+			var new_prompts = prompter.get_prompts(pageModel.current_concept(), pageModel.fe_related());
+			pageModel.prompts(new_prompts);
 		},
 		previousPage: function () {
-			page_model.current_page(Math.max(0, page_model.current_page() - 1));
-			page_model.showConceptPage();
+			pageModel.current_page(Math.max(0, pageModel.current_page() - 1));
+			pageModel.showConceptPage();
 		},
 		nextPage: function () {
 			var objects = fe_search.GetCurrentObjects().length;
-			var max_pages = Math.ceil(objects / page_model.page_length) - 1;
-			page_model.current_page(Math.min(max_pages, page_model.current_page() + 1));
-			page_model.showConceptPage();
+			var max_pages = Math.ceil(objects / pageModel.page_length) - 1;
+			pageModel.current_page(Math.min(max_pages, pageModel.current_page() + 1));
+			pageModel.showConceptPage();
 		},
 		showConceptPage: function () {
-			page_model.current_page_concepts(fe_search.GetCurrentObjects().slice(page_model.current_page() * page_model.page_length, ((page_model.current_page() + 1) * page_model.page_length)));
+			pageModel.current_page_concepts(fe_search.GetCurrentObjects().slice(pageModel.current_page() * pageModel.page_length, ((pageModel.current_page() + 1) * pageModel.page_length)));
 		},
 		resetHotkeys: function () {
 			hotkey_handlers = [];
@@ -214,20 +264,20 @@ $(document).ready(function () {
 			var hotkey_handler = {
 				key: concept_index,
 				action: function () {
-					var current_concept = page_model.current_page_concepts()[hotkey - 1];
-					page_model.selectConcept(current_concept)
+					var current_concept = pageModel.current_page_concepts()[hotkey - 1];
+					pageModel.selectConcept(current_concept)
 				}
 			};
 			hotkey_handlers.push(hotkey_handler);
 			return hotkey;
 		},
 		addHotkey: function (name) {
-			var hotkey = page_model.getUniqueHotkey(name);
+			var hotkey = pageModel.getUniqueHotkey(name);
 			var facet_member = fe_search.Facets[current_facet_index].Members[hotkey_index++];
 			var hotkey_handler = {
 				key: hotkey,
 				action: function () {
-					page_model.addFilter(facet_member);
+					pageModel.addFilter(facet_member);
 				}
 			};
 			hotkey_handlers.push(hotkey_handler);
@@ -243,16 +293,16 @@ $(document).ready(function () {
 			filters.push(filter);
 			fe_search.SetFilter(filters);
 			current_facet_index++;
-			page_model.total_pages = Math.ceil(fe_search.GetCurrentObjectCount() / page_model.page_length);
+			pageModel.total_pages = Math.ceil(fe_search.GetCurrentObjectCount() / pageModel.page_length);
 
-			page_model.resetHotkeys();
-			page_model.current_facet(fe_search.Facets[current_facet_index]);
+			pageModel.resetHotkeys();
+			pageModel.current_facet(fe_search.Facets[current_facet_index]);
 
 			// only display if we are out of facets..
 			if (current_facet_index == fe_search.Facets.length) {
 				facet_hotkey_mode = false;
 				concept_hotkey_mode = true;
-				page_model.showConceptPage();
+				pageModel.showConceptPage();
 			}
 		}
 	};
@@ -270,6 +320,7 @@ $(document).ready(function () {
 			error: function (err) {
 				service.version = 'unknown';
 				service.dialect = 'unknown';
+				$('#configuration-cog').addClass('warning');
 			}
 		});
 	});
@@ -300,7 +351,7 @@ $(document).ready(function () {
 
 	// keyboard hype
 	$(document).keyup(function (e) {
-		page_model.modifier_key_down = false;
+		pageModel.modifier_key_down = false;
 	});
 
 	$(document).keydown(function (e) {
@@ -310,11 +361,11 @@ $(document).ready(function () {
 		}
 
 		if (e.keyCode == 17 || e.keyCode == 18) {
-			page_model.modifier_key_down = true;
+			pageModel.modifier_key_down = true;
 			return; // control key
 		}
 
-		if (page_model.modifier_key_down) {
+		if (pageModel.modifier_key_down) {
 			return;
 		}
 
@@ -326,10 +377,10 @@ $(document).ready(function () {
 
 			if (e.keyCode == 37 || e.keyCode == 38 || e.keyCode == 188) {
 				// back a page - up arrow, left arrow, comma (aka <)
-				page_model.previousPage();
+				pageModel.previousPage();
 			} else if (e.keyCode == 39 || e.keyCode == 40 || e.keyCode == 190) {
 				// forward a page (down arrow, right arrow, period (aka >)
-				page_model.nextPage();
+				pageModel.nextPage();
 			} else {
 				for (var h = 0; h < hotkey_handlers.length; h++) {
 					if (String.fromCharCode(e.keyCode) == hotkey_handlers[h].key) {
@@ -384,12 +435,12 @@ $(document).ready(function () {
 		$('#search_panel_container').fadeOut(200);
 	});
 
-	ko.applyBindings(page_model);
+	ko.applyBindings(pageModel);
 });
 
 function toggleFilters() {
 	$('#filter_control').toggleClass('selected');
-	page_model.show_advanced_filters(!page_model.show_advanced_filters());
+	pageModel.show_advanced_filters(!pageModel.show_advanced_filters());
 
 	$('#button_advanced_filter').toggleClass('active');
 }
@@ -412,7 +463,7 @@ function renderCheckbox(field) {
 }
 
 function resetSearchPanel() {
-	page_model.current_facet(null);
+	pageModel.current_facet(null);
 	$('#searchpanel_error').html('');
 	$('#searchpanel_error').hide();
 }
@@ -425,9 +476,9 @@ function search(query) {
 
 	filters = [];
 	facet_hotkey_mode = true;
-	page_model.resetHotkeys();
-	page_model.current_page_concepts([]);
-	page_model.current_page(0);
+	pageModel.resetHotkeys();
+	pageModel.current_page_concepts([]);
+	pageModel.current_page(0);
 
 	$('#querytext').blur();
 
@@ -435,7 +486,7 @@ function search(query) {
 	current_facet_index = 0;
 
 	$.ajax({
-		url: page_model.ohdsi_service() + 'vocabulary/search/' + query,
+		url: pageModel.ohdsi_service() + 'vocabulary/search/' + query,
 		success: function (results) {
 			if (results.length == 0) {
 				$('#searchpanel_searching').hide();
@@ -476,7 +527,7 @@ function search(query) {
 			};
 			fe_search.sortFacetMembers();
 
-			page_model.current_facet(fe_search.Facets[0]);
+			pageModel.current_facet(fe_search.Facets[0]);
 			$('#search_panel_container').scrollTop(0);
 		},
 		error: function (xhr, message) {
@@ -527,17 +578,20 @@ function loadConcept(concept_id) {
 	concept_hotkey_mode = false;
 
 	var concept_promise = $.ajax({
-		url: page_model.ohdsi_service() + 'vocabulary/concept/' + concept_id,
+		url: pageModel.ohdsi_service() + 'vocabulary/concept/' + concept_id,
 		method: 'GET',
 		contentType: 'application/json',
 		success: function (c, status, xhr) {
-			page_model.current_concept(c);
+			pageModel.current_concept(c);
 			$('#concept_panel_container').fadeIn();
+		},
+		error : function() {
+			alert('An error occurred while attempting to load the concept from your currently configured provider.  Please check the status of your selection from the configuration button in the top right corner.');
 		}
 	});
 
 	var data_promise = $.ajax({
-		url: page_model.ohdsi_service() + 'cdmresults/' + concept_id + '/monthlyConditionOccurrencePrevalence',
+		url: pageModel.ohdsi_service() + 'cdmresults/' + concept_id + '/monthlyConditionOccurrencePrevalence',
 		async: false,
 		method: 'GET',
 		contentType: 'application/json',
@@ -548,15 +602,15 @@ function loadConcept(concept_id) {
 					yValue: 'prevalence',
 					yPercent: 'prevalence'
 				});
-				page_model.data.monthlyConditionPrevalence(byMonthSeries);
+				pageModel.data.monthlyConditionPrevalence(byMonthSeries);
 			} else {
-				page_model.data.monthlyConditionPrevalence(null);
+				pageModel.data.monthlyConditionPrevalence(null);
 			}
 		}
 	});
 
-	var related_promise = $.getJSON(page_model.ohdsi_service() + 'vocabulary/concept/' + concept_id + '/related', function (related) {
-		page_model.related_concepts(related);
+	var related_promise = $.getJSON(pageModel.ohdsi_service() + 'vocabulary/concept/' + concept_id + '/related', function (related) {
+		pageModel.related_concepts(related);
 
 		var fe_temp = new FacetEngine({
 			Facets: [
@@ -623,15 +677,15 @@ function loadConcept(concept_id) {
 		};
 		fe_temp.sortFacetMembers();
 
-		page_model.fe_related(fe_temp);
+		pageModel.fe_related(fe_temp);
 		$('#tablepanel').fadeIn();
 	});
 
 	// triggers once our async loading of the concept and related concepts is complete
-	$.when(related_promise, concept_promise, data_promise).done(function () {
+	$.when(related_promise, concept_promise).done(function () {
 		$('.conceptpanel_concept_details').tooltip();
-		var prompts = prompter.get_prompts(page_model.current_concept(), page_model.fe_related());
-		page_model.prompts(prompts);
+		var prompts = prompter.get_prompts(pageModel.current_concept(), pageModel.fe_related());
+		pageModel.prompts(prompts);
 		$('#prompt_panel_container').show();
 		$('#loading_panel').hide();
 	});

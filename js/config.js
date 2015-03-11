@@ -9,6 +9,6 @@ var ohdsi_services = [
 	},
 	{
 		name: 'Public',
-		url: 'http://54.84.95.238:2020/WebAPI/'
+		url: 'http://api.ohdsi.org:2241/WebAPI/'
 	}
 ];
