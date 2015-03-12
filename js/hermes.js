@@ -569,7 +569,7 @@ function loadConcept(concept_id) {
 	$('#welcome_panel_container').hide();
 
 	$('#search_panel_container').fadeOut();
-	$('#tablepanel').hide();
+	$('#relatedContainer').hide();
 	$('#concept_panel_container').hide();
 	$('#prompt_panel_container').hide();
 
@@ -678,7 +678,6 @@ function loadConcept(concept_id) {
 		fe_temp.sortFacetMembers();
 
 		pageModel.fe_related(fe_temp);
-		$('#tablepanel').fadeIn();
 	});
 
 	// triggers once our async loading of the concept and related concepts is complete
@@ -687,6 +686,7 @@ function loadConcept(concept_id) {
 		var prompts = prompter.get_prompts(pageModel.current_concept(), pageModel.fe_related());
 		pageModel.prompts(prompts);
 		$('#prompt_panel_container').show();
+		$('#relatedContainer').fadeIn();
 		$('#loading_panel').hide();
 	});
 }
