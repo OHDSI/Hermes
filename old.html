@@ -1,0 +1,336 @@
+<html>
+
+<head>
+	<title>HERMES</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-flat.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-flat-extras.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.colVis.css" />
+	<link rel="stylesheet" type="text/css" href="css/hermes.css" />
+	<link rel="stylesheet" type="text/css" href="css/hermes.boostrap.css" />
+	<link rel="stylesheet" type="text/css" href="css/hermes.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="css/chart.css" />
+
+	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/knockout-3.1.0.js"></script>
+	<script type="text/javascript" src="js/knockout.dataTables.binding.js"></script>
+	<script type="text/javascript" src="js/knockout.lineChart.binding.js"></script>
+	<script type="text/javascript" src="js/director.min.js"></script>
+	<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="js/jquery.dataTables.colVis.min.js"></script>
+	<script type="text/javascript" src="js/jnj.facets.js"></script>
+	<script type="text/javascript" src="js/jnj.facets.prompts.js"></script>
+	<script type="text/javascript" src="js/d3.min.js"></script>
+	<script type="text/javascript" src="js/d3.tip.js"></script>
+	<script type="text/javascript" src="js/jnj.chart.js"></script>
+	<script type="text/javascript" src="js/config.js"></script>
+	<script type="text/javascript" src="js/hermes.js"></script>
+</head>
+
+<body>
+	<nav id="topnavigation" class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="container">
+
+			<a class="navbar-brand" href="#">
+				<img class="" src="images/logo.png">HERMES</a>
+
+			<div class="input-group">
+				<input type="text" class="form-control" id="querytext" placeholder="Search">
+				<div class="input-group-btn">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+						<span id="configuration-cog" class="glyphicon glyphicon-cog"></span>
+					</button>
+					<button id="button_shopping_cart" type="button" class="btn btn-default">
+						<div class="glyphicon glyphicon-shopping-cart" data-bind="visible:selected_concepts().length == 0"></div>
+						<div class="badge" data-bind="visible:selected_concepts().length > 0, text:selected_concepts().length"></div>
+					</button>
+					<ul class="dropdown-menu dropdown-menu-right" role="menu" data-bind="foreach:ohdsi_services">
+						<li>
+							<a href="#" data-bind="click: $root.updateService">
+								<div class="service-name">
+									<span data-bind="text: name"></span>
+									<span data-bind="visible: url == $root.ohdsi_service(), css: { warning: version == 'unknown' }" class="glyphicon glyphicon-ok-sign"></span>
+								</div>
+								<div class="service-info" data-bind="text:'Vocabulary ' + version + ' (' + dialect + ')'"></div>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<div id="welcome_panel_container" class="container">
+		<div class="panel panel-default">
+			<div class="panel-heading">Welcome to HERMES</div>
+			<div class="panel-body">HERMES is the Health Entity Relationship and Metadata Exploration System (HERMES). HERMES is a web-based vocabulary browsing tool for OMOP CDM v5.
+				<div id="searchhint" class="text-center">type anywhere and press enter to begin a new search</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="concept_panel_container" class="container" data-bind="if: current_concept">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<div class="row">
+					<div class="col-md-11">
+						<span class="conceptpanel_concept_name" data-bind="text:current_concept().CONCEPT_NAME"></span>
+						<div id="conceptpanel_concept" data-bind="with: current_concept">
+							<div>
+								<span class="conceptpanel_concept_details" data-bind="text:DOMAIN_ID " title="Domain"></span>
+								<span class="conceptpanel_concept_details" data-bind="text:VOCABULARY_ID " title="Vocabulary"></span>
+								<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CODE " title="Concept Code"></span>
+								<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_ID " title="Concept Identifier"></span>
+								<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CLASS_ID " title="Class"></span>
+								<span class="conceptpanel_concept_details" data-bind="text:INVALID_REASON, attr: { class: INVALID_REASON == 'Valid' ? 'conceptpanel_concept_details' : 'conceptpanel_concept_details invalid'} " title="Invalid Reason"></span>
+								<span class="conceptpanel_concept_details" data-bind="text:STANDARD_CONCEPT, attr: { class: STANDARD_CONCEPT == 'Standard' ? 'conceptpanel_concept_details' : 'conceptpanel_concept_details invalid'} " title="Standard Concept"></span>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-1">
+						<button onclick="pageModel.saveCurrentConcept();" title="Save to Selections" class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-save"></span>
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="panel-body">
+
+				<div id="testing" class="panel panel-default" data-bind="if:data.monthlyConditionPrevalence, visible:data.monthlyConditionPrevalence">
+					<div class="panel-heading">
+						Monthly Condition Prevalance
+					</div>
+					<div data-bind="lineChart: data.monthlyConditionPrevalence" class="panel-body">
+					</div>
+				</div>
+
+				<div id="relatedContainer" data-bind="if: fe_related">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col-md-9">
+									<span data-bind="text: 'Concepts Related to ' + current_concept().CONCEPT_NAME"></span>
+								</div>
+								<div class="col-md-3">
+									<div class="btn-toolbar">
+
+										<div class="dropdown btn-group pull-right" title="Filters">
+											<button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="button_basic_filter" data-toggle="dropdown" aria-expanded="true">
+												<span class="glyphicon glyphicon-filter"></span>
+											</button>
+											<ul class="dropdown-menu dropdown-menu-right" role="menu">
+												<!-- ko foreach: prompts -->
+												<li role="presentation">
+													<a href="#" data-bind="click:pageModel.activatePrompt, text:caption" role="menuitem" tabindex="-1"></a>
+												</li>
+												<!-- /ko -->
+												<li role="presentation">
+													<a href="#" onclick="toggleFilters();return false;" role="menuitem" tabindex="-1">Advanced Filters</a>
+												</li>
+												<li role="presentation">
+													<a href="#" onclick="pageModel.clearPrompts();return false;" role="menuitem" tabindex="-1">Clear Filters</a>
+												</li>
+											</ul>
+										</div>
+
+										<button onclick="pageModel.saveSelectedConcepts();" title="Save Selections" class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-save"></span>
+										</button>
+
+										<div class="dropdown btn-group pull-right" title="Selections">
+											<button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
+												<span class="glyphicon glyphicon-ok-sign"></span>
+											</button>
+											<ul class="dropdown-menu dropdown-menu-right" role="menu">
+												<li role="presentation"><a href="javascript:pageModel.selectAllConcepts();" role="menuitem" tabindex="-1">Select All</a>
+												</li>
+												<li role="presentation"><a href="javascript:pageModel.clearSelectedConcepts();" role="menuitem" tabindex="-1">Select None</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="panel-body">
+
+							<div id="advanced_panel_container" data-bind="visible:show_advanced_filters">
+								<div class="panel panel-default" data-bind="if: fe_related">
+									<div id="filterpanel" class="panel-body" style="padding:0px 15px 0px 15px;" data-bind="with: fe_related">
+										<div id="filterpanel_container" data-bind="foreach:Facets">
+											<div class="row">
+												<div class="filterpanel_facet_name" data-bind="text:caption"></div>
+												<div class="filterpanel_facet_members" data-bind="foreach:Members">
+													<div class="col-sm-2 filterpanel_facet_member">
+														<span class="filterpanel_facet_member_name" data-bind="attr: {id: $parentContext.$index() + '-' + $index()}, click: function() { pageModel.updateFilters(); }, css : {selected: Selected}, text:Name + ' (' + ActiveCount + ')'"></span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<table id="dt_related" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
+            data: pageModel.fe_related().GetCurrentObjects(),
+            options: {
+												dom: 'Clfrtip',
+												orderClasses: false,
+												ordering: true,
+												order: [[ 2, 'asc' ]],
+                        columns: [
+														{ title: '', render: renderSelected, orderable:false, searchable:false},
+														{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
+														{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
+                            { title: 'Related Concept', data: 'CONCEPT_NAME', render: renderLink},
+                            { title: 'Class', data: 'CONCEPT_CLASS_ID' },
+													  { title: 'Relationship', data: 'RELATIONSHIP_CAPTION', visible: false},
+														{ title: 'Standard Concept', data: 'STANDARD_CONCEPT', visible: false},
+                            { title: 'Domain', data: 'DOMAIN_ID' },
+														{ title: 'Vocabulary', data: 'VOCABULARY_ID' }
+                        ]
+                    }
+        }">
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<div id="loading_panel" class="container text-center">
+					<div>
+						<img src="images/animated.gif">
+					</div>
+					<div>
+						LOADING
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	<div id="selected_concepts_container" class="container" data-bind="visible: selected_concepts().length > 0">
+		<div id="selected_concepts_panel" class="panel panel-default ">
+			<div class="panel-heading">
+				<div class="btn-toolbar">
+					<span>Concept Set</span>
+
+					<div class="dropdown btn-group pull-right" title="Remove">
+						<button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="button_selected_remove" data-toggle="dropdown" aria-expanded="true">
+							<span class="glyphicon glyphicon-remove-sign"></span>
+						</button>
+						<ul class="dropdown-menu dropdown-menu-right" role="menu">
+							<li role="presentation"><a href="javascript:pageModel.removeSelectedConcepts();" role="menuitem" tabindex="-1">Remove Selected</a>
+							</li>
+							<li role="presentation"><a href="javascript:pageModel.removeAllSelectedConcepts();" role="menuitem" tabindex="-1">Remove All</a>
+							</li>
+						</ul>
+					</div>
+
+					<div class="dropdown btn-group pull-right" title="Export">
+						<button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="button_selected_remove" data-toggle="dropdown" aria-expanded="true">
+							<span class="glyphicon glyphicon-export"></span>
+						</button>
+						<ul class="dropdown-menu dropdown-menu-right" role="menu">
+							<li role="presentation"><a href="javascript:pageModel.generateConceptIdList();" role="menuitem" tabindex="-1">Export Concept Id List</a>
+							</li>
+							<li role="presentation"><a href="javascript:pageModel.generateConceptList();" role="menuitem" tabindex="-1">Export Concept Set (JSON)</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="panel-body">
+				<table id="dt_selected" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
+            data: pageModel.selected_concepts(),
+            options: {
+							orderClasses: false,
+							deferRender: true,
+							order: [[3, 'desc']],
+              columns: [
+									{ title: '', render: renderSelected, orderable:false, searchable:false},
+									{ title: 'Concept Id', data: 'concept.conceptId'},
+									{ title: 'Concept Code', data: 'concept.conceptCode'},
+                  { title: 'Concept Name', data: 'concept.conceptName', render: renderBoundLink},
+                  { title: 'Domain', data: 'concept.domainId' },
+									{ title: 'Standard Concept', data: 'concept.standardConcept' },
+									{ title: 'Exclude', class:'text-center', orderable:false,render: function() { return renderCheckbox('isExcluded');} },
+									{ title: 'Descendants', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeDescendants');} },
+									{ title: 'Mapped', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeMapped');} }
+              ]
+           }
+        }">
+				</table>
+
+				<div id="panel-warnings" class="panel panel-default" data-bind="visible: selectedConceptsWarnings().length > 0">
+					<div class="panel-heading">Concept Set Warnings</div>
+					<div class="panel-body">
+						<div data-bind="foreach:selectedConceptsWarnings">
+							<div class="alert alert-danger" role="alert" data-bind="text:$data"></div>
+						</div>
+					</div>
+				</div>
+
+				<div id="generated_codeset_container" data-bind="if:generated_codeset">
+					<div class="panel panel-default">
+						<div class="panel-heading">Export</div>
+						<div class="panel-body">
+							<pre data-bind="html: generated_codeset"></pre>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="search_panel_container">
+		<div id="searchpanel_searching">s e a r c h i n g . . .</div>
+		<div id="searchpanel_error"></div>
+		<div id="searchpanel_facets" data-bind="with:current_facet">
+			<div id="searchpanel_current_facet" data-bind="text:caption"></div>
+			<div id="searchpanel_facet" data-bind="foreach:Members.filter(function(m) {return m.ActiveCount > 0;})">
+				<div class="searchpanel_facets_facet" data-bind="click:$root.addFilter">
+					<div class="searchpanel_facet_hotkey" data-bind="text:$root.addHotkey(Name)"></div>
+					<div class=" searchpanel_facet_member">
+						<div class="searchpanel_facet_member_name">
+							<span data-bind="text:Name "></span>
+							<span data-bind="text:'&nbsp;(' + ActiveCount + ')'"></span>
+						</div>
+						<div class="searchpanel_facet_percent " data-bind="style: { width : ((ActiveCount / fe_search.GetMaxMemberLength(current_facet_index)) * 100) + '%'}"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="searchpanel_concept" data-bind="if:current_page_concepts().length > 0">
+			<div id="paging_container">
+				<div id="paging_info">
+					Page <span data-bind="text: $root.current_page() + 1"></span> / <span data-bind="text: $root.total_pages"></span>
+				</div>
+				<div id="paging_controls">
+					<span class="span_link" onclick="pageModel.previousPage();">&lt;&lt; Previous</span> <span class="span_link" onclick="pageModel.nextPage();">Next &gt;&gt;</span>
+				</div>
+			</div>
+			<div id="searchpanel_results " data-bind="foreach:current_page_concepts ">
+				<div class="searchpanel_concept " data-bind="click: $root.selectConcept">
+					<div class="searchpanel_concept_hotkey" data-bind="text: $root.addConceptHotkey($index() + 1)">
+					</div>
+					<div class="searchpanel_concept_name ">
+						<span data-bind="text:CONCEPT_NAME, attr: { class: INVALID_REASON == 'Valid' ? '' : 'invalid' } "></span>
+					</div>
+					<div>
+						<span class="searchpanel_concept_facet_info" data-bind="text:VOCABULARY_ID "></span>
+						<span class="searchpanel_concept_facet_info" data-bind="text:DOMAIN_ID "></span>
+						<span class="searchpanel_concept_facet_info" data-bind="text:CONCEPT_CODE "></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+</html>

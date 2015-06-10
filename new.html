@@ -1,0 +1,135 @@
+<html>
+
+<head>
+	<title>HERMES</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-flat.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/bootstrap-flat-extras.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/1.0.5/css/dataTables.responsive.css" />
+	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.colVis.css" />
+	<link rel="stylesheet" type="text/css" href="css/hermes.css" />
+	<link rel="stylesheet" type="text/css" href="css/hermes.boostrap.css" />
+	<link rel="stylesheet" type="text/css" href="css/hermes.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="css/chart.css" />
+	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+
+	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/knockout-3.1.0.js"></script>
+	<script type="text/javascript" src="js/knockout.dataTables.binding.js"></script>
+	<script type="text/javascript" src="js/knockout.lineChart.binding.js"></script>
+	<script type="text/javascript" src="js/director.min.js"></script>
+	<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="js/jquery.dataTables.colVis.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/responsive/1.0.5/js/dataTables.responsive.js"></script>
+	<script type="text/javascript" src="js/jnj.facets.js"></script>
+	<script type="text/javascript" src="js/jnj.facets.prompts.js"></script>
+	<script type="text/javascript" src="js/d3.min.js"></script>
+	<script type="text/javascript" src="js/d3.tip.js"></script>
+	<script type="text/javascript" src="js/jnj.chart.js"></script>
+	<script type="text/javascript" src="js/config.js"></script>
+	<script type="text/javascript" src="js/app.js"></script>
+</head>
+
+<body>
+
+	<div id="wrapper">
+
+		<div id="minibar-wrapper">
+			<ul class="minibar-nav">
+				<li class="minibar-brand">
+					<a class="navbar-brand" href="#"><img class="" src="images/logo.png">
+					</a>
+				</li>
+				<li class="sidebar-link">
+					<a href="#"><i class="fa fa-search"></i></a>
+				</li>
+				<li class="sidebar-link">
+					<a href="#"><i class="fa fa-shopping-cart"></i></a>
+				</li>
+			</ul>
+		</div>
+
+		<div id="sidebar-wrapper">
+			<ul class="sidebar-nav">
+				<li class="sidebar-brand">
+					<a class="navbar-brand" href="#"><img class="" src="images/logo.png">HERMES</a>
+				</li>
+				<li class="sidebar-link">
+					<a href="#"><i class="fa fa-search"></i> Search</a>
+				</li>
+				<ul data-bind="foreach:recentSearch">
+					<li class="sidebar-sublink">
+						<a href="#" data-bind="text: caption + ' (' + resultLength + ')'"></a>
+					</li>
+				</ul>
+
+				<li class="sidebar-link">
+					<a href="#"><i class="fa fa-shopping-cart"></i> Concept Set</a>
+				</li>
+			</ul>
+		</div>
+
+		<div id="wrapperPageContent">
+			<div id="wrapperSearch" class="wrapper">
+				<div class="header">Search</div>
+				<input id="querytext" class="form-control" type="text" value="cardiomyopathy" />
+			</div>
+
+			<div id="wrapperSearchResults" data-bind="if: hasSearchResultsAvailable">
+				<div>
+					<div class="header" data-bind="text: 'Search Results for ' + pageModel.currentSearch()"></div>
+				</div>
+
+				<div id="wrapperSearchFilter" data-bind="with: feSearch">
+					<div id="filterpanel_container" data-bind="foreach:Facets">
+						<div class="filterpanel_facet_name" data-bind="text:caption"></div>
+						<div class="filterpanel_facet_members" data-bind="foreach:Members">
+							<div class="filterpanel_facet_member">
+								<span class="filterpanel_facet_member_name" data-bind="attr: {id: $parentContext.$index() + '-' + $index()}, click: function() { pageModel.updateFilters(); }, css : {selected: Selected}, text:Name + ' (' + ActiveCount + ')'"></span>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div id="wrapperSearchResultsTable">
+					<table class="stripe compact hover" cellspacing="0" data-bind="dataTable:{
+            data: pageModel.feSearch().GetCurrentObjects(),
+            options: {
+												responsive: true,
+												dom: 'Clfrtip',
+												orderClasses: false,
+												ordering: true,
+												order: [[ 2, 'asc' ]],
+                        columns: [
+														{ title: '', render: renderSelected, orderable:false, searchable:false},
+														{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
+														{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
+                            { title: 'Concept Name', data: 'CONCEPT_NAME', render: renderLink},
+                            { title: 'Class', data: 'CONCEPT_CLASS_ID' },
+														{ title: 'Standard Concept', data: 'STANDARD_CONCEPT', visible: false},
+                            { title: 'Domain', data: 'DOMAIN_ID' },
+														{ title: 'Vocabulary', data: 'VOCABULARY_ID' }
+                        ]
+                    }
+        }">
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</div>
+
+	<div id="panelLoading" class="container text-center">
+		<div>
+			<img src="images/animated.gif">
+		</div>
+	</div>
+
+</body>
+
+</html>

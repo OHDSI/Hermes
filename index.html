@@ -7,330 +7,781 @@
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
 	<link rel="stylesheet" type="text/css" href="css/bootstrap-flat.min.css" />
-	<link rel="stylesheet" type="text/css" href="css/bootstrap-flat-extras.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/1.0.5/css/dataTables.responsive.css" />
 	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.min.css" />
 	<link rel="stylesheet" type="text/css" href="css/jquery.dataTables.colVis.css" />
-	<link rel="stylesheet" type="text/css" href="css/hermes.css" />
-	<link rel="stylesheet" type="text/css" href="css/hermes.boostrap.css" />
 	<link rel="stylesheet" type="text/css" href="css/hermes.dataTables.css" />
 	<link rel="stylesheet" type="text/css" href="css/chart.css" />
+	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/update.css" />
 
 	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/knockout-3.1.0.js"></script>
 	<script type="text/javascript" src="js/knockout.dataTables.binding.js"></script>
 	<script type="text/javascript" src="js/knockout.lineChart.binding.js"></script>
+	<script type="text/javascript" src="js/knockout.mapping.min.js"></script>
 	<script type="text/javascript" src="js/director.min.js"></script>
 	<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
 	<script type="text/javascript" src="js/jquery.dataTables.colVis.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/responsive/1.0.5/js/dataTables.responsive.js"></script>
 	<script type="text/javascript" src="js/jnj.facets.js"></script>
-	<script type="text/javascript" src="js/jnj.facets.prompts.js"></script>
+	<script type="text/javascript" src="js/metatrix.js"></script>
 	<script type="text/javascript" src="js/d3.min.js"></script>
 	<script type="text/javascript" src="js/d3.tip.js"></script>
 	<script type="text/javascript" src="js/jnj.chart.js"></script>
 	<script type="text/javascript" src="js/config.js"></script>
-	<script type="text/javascript" src="js/hermes.js"></script>
+	<script type="text/javascript" src="js/visualization.packinghiearchy.js"></script>
+	<script type="text/javascript" src="js/app.js"></script>
 </head>
 
 <body>
-	<nav id="topnavigation" class="navbar navbar-default navbar-fixed-top" role="navigation">
-		<div class="container">
-
-			<a class="navbar-brand" href="#">
-				<img class="" src="images/logo.png">HERMES</a>
-
-			<div class="input-group">
-				<input type="text" class="form-control" id="querytext" placeholder="Search">
-				<div class="input-group-btn">
-					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-						<span id="configuration-cog" class="glyphicon glyphicon-cog"></span>
-					</button>
-					<button id="button_shopping_cart" type="button" class="btn btn-default">
-						<div class="glyphicon glyphicon-shopping-cart" data-bind="visible:selected_concepts().length == 0"></div>
-						<div class="badge" data-bind="visible:selected_concepts().length > 0, text:selected_concepts().length"></div>
-					</button>
-					<ul class="dropdown-menu dropdown-menu-right" role="menu" data-bind="foreach:ohdsi_services">
-						<li>
-							<a href="#" data-bind="click: $root.updateService">
-								<div class="service-name">
-									<span data-bind="text: name"></span>
-									<span data-bind="visible: url == $root.ohdsi_service(), css: { warning: version == 'unknown' }" class="glyphicon glyphicon-ok-sign"></span>
-								</div>
-								<div class="service-info" data-bind="text:'Vocabulary ' + version + ' (' + dialect + ')'"></div>
-							</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</div>
-	</nav>
-
-	<div id="welcome_panel_container" class="container">
-		<div class="panel panel-default">
-			<div class="panel-heading">Welcome to HERMES</div>
-			<div class="panel-body">HERMES is the Health Entity Relationship and Metadata Exploration System (HERMES). HERMES is a web-based vocabulary browsing tool for OMOP CDM v5.
-				<div id="searchhint" class="text-center">type anywhere and press enter to begin a new search</div>
-			</div>
-		</div>
+	<div id="wrapperLeftMenu">
+		<div id="wrapperLogo"><img src="images/ohdsi.png">Hermes</div>
+		<ul>
+			<li data-bind="click: function() {currentView('search'); document.location='#';}">
+				<a href="#"><i class="fa fa-search"></i> Search</a>
+			</li>
+			<ul data-bind="foreach:recentSearch">
+				<li>
+					<a data-bind="attr: {href:'#/search/' + query}, text: caption + ' (' + resultLength + ')'"></a>
+				</li>
+			</ul>
+			<li>
+				<a href="#"><i class="fa fa-history"></i> Recent Concepts</a>
+			</li>
+			<ul data-bind="foreach:recentConcept">
+				<li>
+					<a data-bind="text: CONCEPT_NAME, attr: { href: '#/concept/' + CONCEPT_ID}"></a>
+				</li>
+			</ul>
+			<li data-bind="click: function() {currentView('conceptset'); document.location='#';}">
+				<a href="#"><i class="fa fa-shopping-cart"></i> Concept Set</a>
+				<span data-bind="if: pageModel.selectedConcepts().length > 0">
+					<span class="badge" data-bind="text:pageModel.selectedConcepts().length"></span>
+				</span>
+			</li>
+			<li data-bind="click: function() { currentView('import'); document.location='#' }">
+				<a href="#"><i class="fa fa-upload"></i> Import</a>
+			</li>
+			<li data-bind="click: function() { currentView('configure'); document.location='#' }">
+				<a href="#"><i class="fa fa-cog"></i> Configure</a>
+			</li>
+		</ul>
 	</div>
+	<div id="wrapperMainWindow">
+		<div id="wrapperMainWindowContainer">
 
-	<div id="concept_panel_container" class="container" data-bind="if: current_concept">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="row">
-					<div class="col-md-11">
-						<span class="conceptpanel_concept_name" data-bind="text:current_concept().CONCEPT_NAME"></span>
-						<div id="conceptpanel_concept" data-bind="with: current_concept">
-							<div>
-								<span class="conceptpanel_concept_details" data-bind="text:DOMAIN_ID " title="Domain"></span>
-								<span class="conceptpanel_concept_details" data-bind="text:VOCABULARY_ID " title="Vocabulary"></span>
-								<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CODE " title="Concept Code"></span>
-								<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_ID " title="Concept Identifier"></span>
-								<span class="conceptpanel_concept_details" data-bind="text:CONCEPT_CLASS_ID " title="Class"></span>
-								<span class="conceptpanel_concept_details" data-bind="text:INVALID_REASON, attr: { class: INVALID_REASON == 'Valid' ? 'conceptpanel_concept_details' : 'conceptpanel_concept_details invalid'} " title="Invalid Reason"></span>
-								<span class="conceptpanel_concept_details" data-bind="text:STANDARD_CONCEPT, attr: { class: STANDARD_CONCEPT == 'Standard' ? 'conceptpanel_concept_details' : 'conceptpanel_concept_details invalid'} " title="Standard Concept"></span>
-							</div>
+			<div id="wrapperInitializing" data-bind="if: currentView() == 'initializing'">
+				<div class="wrapperTitle">
+					<i class="fa fa-refresh fa-spin"></i> Initializing...
+				</div>
+			</div>
+
+			<div id="wrapperLoading" data-bind="if: currentView() == 'loading'">
+				<div class="wrapperTitle">
+					<i class="fa fa-refresh fa-spin"></i> Loading...
+				</div>
+			</div>
+
+			<div data-bind="if: currentView() == 'configure'">
+				<div class="wrapperTitle">
+					Configure
+				</div>
+
+				<div id="wrapperConfigure">
+					<div class="heading">Configured Services</div>
+					<div data-bind="foreach:pageModel.services">
+						<div data-bind="if:available==true">
+							<div class="serviceStatus serviceAvailable fa fa-check-circle"></div>
 						</div>
-					</div>
-					<div class="col-md-1">
-						<button onclick="pageModel.saveCurrentConcept();" title="Save to Selections" class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-save"></span>
-						</button>
+
+						<div data-bind="if:available==false">
+							<div class="serviceStatus serviceUnavailable fa fa-exclamation-circle"></div>
+						</div>
+
+						<span class="serviceName" data-bind="text:name"></span> (
+						<span class="serviceUrl" data-bind="text:url"></span>)
+						<div data-bind="if:available==false">
+							<div class="error" data-bind="text:xhr.statusText"></div>
+						</div>
+						<table data-bind="if:$data.sources.length > 0" class="configureSourceTable">
+							<thead>
+								<th></th>
+								<th>Source Name</th>
+								<th>Vocabulary Version</th>
+								<th>Dialect</th>
+								<th class="centered">Vocabulary</th>
+								<th class="centered">Evidence</th>
+								<th class="centered">Density</th>
+								<th class="centered">Incidence</th>
+							</thead>
+							<tbody data-bind="foreach:$data.sources">
+								<tr>
+									<td><i class="fa" data-bind="if:!initialized, attr: { title : error }, css: { 'fa-check-circle': initialized, 'fa-exclamation-circle': !initialized }"></i>
+										<span data-bind="text:error"></span>
+									</td>
+									<td data-bind="text:sourceName"></td>
+									<td data-bind="text:version"></td>
+									<td data-bind="text:sourceDialect"></td>
+									<td class="configureRadio">
+										<input type="radio" name="radioSource" data-bind="disable:!hasVocabulary, checkedValue:vocabularyUrl, checked:pageModel.vocabularyUrl">
+									</td>
+									<td class="configureRadio">
+										<input type="radio" name="radioEvidence" data-bind="disable:!hasEvidence, checkedValue:evidenceUrl, checked:pageModel.evidenceUrl">
+									</td>
+									<td class="configureRadio">
+										<input type="radio" name="radioDensity" data-bind="disable:!hasResults, checkedValue:resultsUrl, checked:pageModel.resultsUrl">
+									</td>
+									<td class="configureCheckbox">
+										<input type="checkbox" name="checkResults" data-bind="disable:!hasResults, checked:hasResults">
+									</td>
+								</tr>
+							</tbody>
+						</table>
 					</div>
 				</div>
 			</div>
-			<div class="panel-body">
 
-				<div id="testing" class="panel panel-default" data-bind="if:data.monthlyConditionPrevalence, visible:data.monthlyConditionPrevalence">
-					<div class="panel-heading">
-						Monthly Condition Prevalance
-					</div>
-					<div data-bind="lineChart: data.monthlyConditionPrevalence" class="panel-body">
-					</div>
+			<div data-bind="if: currentView() == 'import'">
+				<div class="wrapperTitle">
+					Import
 				</div>
 
-				<div id="relatedContainer" data-bind="if: fe_related">
-					<div class="panel panel-default">
-						<div class="panel-heading">
-							<div class="row">
-								<div class="col-md-9">
-									<span data-bind="text: 'Concepts Related to ' + current_concept().CONCEPT_NAME"></span>
-								</div>
-								<div class="col-md-3">
-									<div class="btn-toolbar">
+				<ul class="nav nav-tabs">
+					<li role="presentation" data-bind="click: function() {pageModel.currentImportMode('identifiers');}, attr: {class: currentImportMode() == 'identifiers' ? 'active' : ''}"><a>Concept Identifiers</a>
+					</li>
+					<li role="presentation" data-bind="click: function() {pageModel.currentImportMode('conceptset');}, attr: {class: currentImportMode() == 'conceptset' ? 'active' : ''}"><a>Concept Set</a>
+					</li>
+				</ul>
+				<div id="wrapperImport">
+					<div id="wrapperImportConceptIdentifiers" class="paddedWrapper form-group" data-bind="if:pageModel.currentImportMode() == 'identifiers'">
+						<div class="heading">Concept Identifiers</div>
+						<textarea class="form-control" rows="5" id="textImportConceptIdentifiers" data-bind="if:pageModel.currentImportMode() == 'conceptset'"></textarea>
+						<button type="button" onclick="importConceptIdentifiers()" class="btn btn-sm btn-primary">Import Concept Identifiers</button>
 
-										<div class="dropdown btn-group pull-right" title="Filters">
-											<button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="button_basic_filter" data-toggle="dropdown" aria-expanded="true">
-												<span class="glyphicon glyphicon-filter"></span>
-											</button>
-											<ul class="dropdown-menu dropdown-menu-right" role="menu">
-												<!-- ko foreach: prompts -->
-												<li role="presentation">
-													<a href="#" data-bind="click:pageModel.activatePrompt, text:caption" role="menuitem" tabindex="-1"></a>
-												</li>
-												<!-- /ko -->
-												<li role="presentation">
-													<a href="#" onclick="toggleFilters();return false;" role="menuitem" tabindex="-1">Advanced Filters</a>
-												</li>
-												<li role="presentation">
-													<a href="#" onclick="pageModel.clearPrompts();return false;" role="menuitem" tabindex="-1">Clear Filters</a>
-												</li>
-											</ul>
-										</div>
-
-										<button onclick="pageModel.saveSelectedConcepts();" title="Save Selections" class="btn btn-primary btn-sm pull-right"><span class="glyphicon glyphicon-save"></span>
-										</button>
-
-										<div class="dropdown btn-group pull-right" title="Selections">
-											<button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="true">
-												<span class="glyphicon glyphicon-ok-sign"></span>
-											</button>
-											<ul class="dropdown-menu dropdown-menu-right" role="menu">
-												<li role="presentation"><a href="javascript:pageModel.selectAllConcepts();" role="menuitem" tabindex="-1">Select All</a>
-												</li>
-												<li role="presentation"><a href="javascript:pageModel.clearSelectedConcepts();" role="menuitem" tabindex="-1">Select None</a>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<div class="panel-body">
-
-							<div id="advanced_panel_container" data-bind="visible:show_advanced_filters">
-								<div class="panel panel-default" data-bind="if: fe_related">
-									<div id="filterpanel" class="panel-body" style="padding:0px 15px 0px 15px;" data-bind="with: fe_related">
-										<div id="filterpanel_container" data-bind="foreach:Facets">
-											<div class="row">
-												<div class="filterpanel_facet_name" data-bind="text:caption"></div>
-												<div class="filterpanel_facet_members" data-bind="foreach:Members">
-													<div class="col-sm-2 filterpanel_facet_member">
-														<span class="filterpanel_facet_member_name" data-bind="attr: {id: $parentContext.$index() + '-' + $index()}, click: function() { pageModel.updateFilters(); }, css : {selected: Selected}, text:Name + ' (' + ActiveCount + ')'"></span>
-													</div>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<table id="dt_related" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
-            data: pageModel.fe_related().GetCurrentObjects(),
+						<div class="heading">Imported Concepts</div>
+						<table width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+            data: pageModel.importedConcepts(),
             options: {
-												dom: 'Clfrtip',
+							dom: 'Clfiprt',
+												colVis: {
+													buttonText: 'Change Columns',
+													align: 'right',
+													overlayFade: 0,
+													showAll: 'Show All Columns',
+													restore: 'Reset Columns'
+												},
+												rowCallback: contextSensitiveLinkColor,
+												lengthMenu: [[25, 50, 100, -1], [25, 50, 100,'All']],
 												orderClasses: false,
+												deferRender: true,
+												autoWidth: false,
 												ordering: true,
 												order: [[ 2, 'asc' ]],
                         columns: [
-														{ title: '', render: renderSelected, orderable:false, searchable:false},
+														{ title: '', render: renderConceptSelector, orderable:false, searchable:false},
 														{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
 														{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
-                            { title: 'Related Concept', data: 'CONCEPT_NAME', render: renderLink},
+                            { title: 'Concept Name', data: 'CONCEPT_NAME', render: renderLink},
                             { title: 'Class', data: 'CONCEPT_CLASS_ID' },
-													  { title: 'Relationship', data: 'RELATIONSHIP_CAPTION', visible: false},
-														{ title: 'Standard Concept', data: 'STANDARD_CONCEPT', visible: false},
+														{ title: 'Standard Concept Caption', data: 'STANDARD_CONCEPT_CAPTION', visible: false},
+														{ title: 'Standard Concept Code', data: 'STANDARD_CONCEPT', visible: false},
                             { title: 'Domain', data: 'DOMAIN_ID' },
 														{ title: 'Vocabulary', data: 'VOCABULARY_ID' }
                         ]
                     }
         }">
-							</table>
+						</table>
+
+						<div class="linkLegend">
+							<div class="linkLegendItem">
+								<div class="swatch standard">
+								</div>
+								<div class="linkLegendTitle">Standard</div>
+							</div>
+							<div class="linkLegendItem">
+								<div class="swatch nonStandard">
+								</div>
+								<div class="linkLegendTitle">Non-Standard</div>
+							</div>
+							<div class="linkLegendItem">
+								<div class="swatch classification">
+								</div>
+								<div class="linkLegendTitle">Classification</div>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div id="loading_panel" class="container text-center">
-					<div>
-						<img src="images/animated.gif">
-					</div>
-					<div>
-						LOADING
-					</div>
-				</div>
+					<div id="wrapperImportConceptSet" class="paddedWrapper form-group" data-bind="if:pageModel.currentImportMode() == 'conceptset'">
+						<div class="heading">Concept Set Expression JSON</div>
+						<textarea class="form-control" rows="5" id="textImportConceptSet"></textarea>
+						<button type="button" onclick="importConceptSetExpression()" class="btn btn-sm btn-primary">Import Concept Set Expression</button>
 
-			</div>
-		</div>
-	</div>
-
-	<div id="selected_concepts_container" class="container" data-bind="visible: selected_concepts().length > 0">
-		<div id="selected_concepts_panel" class="panel panel-default ">
-			<div class="panel-heading">
-				<div class="btn-toolbar">
-					<span>Concept Set</span>
-
-					<div class="dropdown btn-group pull-right" title="Remove">
-						<button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="button_selected_remove" data-toggle="dropdown" aria-expanded="true">
-							<span class="glyphicon glyphicon-remove-sign"></span>
-						</button>
-						<ul class="dropdown-menu dropdown-menu-right" role="menu">
-							<li role="presentation"><a href="javascript:pageModel.removeSelectedConcepts();" role="menuitem" tabindex="-1">Remove Selected</a>
-							</li>
-							<li role="presentation"><a href="javascript:pageModel.removeAllSelectedConcepts();" role="menuitem" tabindex="-1">Remove All</a>
-							</li>
-						</ul>
-					</div>
-
-					<div class="dropdown btn-group pull-right" title="Export">
-						<button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="button_selected_remove" data-toggle="dropdown" aria-expanded="true">
-							<span class="glyphicon glyphicon-export"></span>
-						</button>
-						<ul class="dropdown-menu dropdown-menu-right" role="menu">
-							<li role="presentation"><a href="javascript:pageModel.generateConceptIdList();" role="menuitem" tabindex="-1">Export Concept Id List</a>
-							</li>
-							<li role="presentation"><a href="javascript:pageModel.generateConceptList();" role="menuitem" tabindex="-1">Export Concept Set (JSON)</a>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-			<div class="panel-body">
-				<table id="dt_selected" class="stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
-            data: pageModel.selected_concepts(),
+						<div class="heading">Imported Concept Set Expression</div>
+						<table class="conceptSetTable stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
+            data: pageModel.selectedConcepts(),
             options: {
+							dom: 'Clfiprt',
+							colVis: {
+								buttonText: 'Change Columns',
+								align: 'right',
+								overlayFade: 0,
+								showAll: 'Show All Columns',
+								restore: 'Reset Columns'
+							},
+							rowCallback: contextSensitiveLinkColor,
+							lengthMenu: [[25, 50, 100, -1], [25, 50, 100,'All']],
 							orderClasses: false,
 							deferRender: true,
+							autoWidth: false,
 							order: [[3, 'desc']],
               columns: [
-									{ title: '', render: renderSelected, orderable:false, searchable:false},
-									{ title: 'Concept Id', data: 'concept.conceptId'},
-									{ title: 'Concept Code', data: 'concept.conceptCode'},
-                  { title: 'Concept Name', data: 'concept.conceptName', render: renderBoundLink},
-                  { title: 'Domain', data: 'concept.domainId' },
-									{ title: 'Standard Concept', data: 'concept.standardConcept' },
+									{ title: '<li class=\'fa fa-shopping-cart\'></li>', render: renderConceptSetItemSelector, orderable:false, searchable:false},
+									{ title: 'Concept Id', data: 'concept.CONCEPT_ID', visible:false},
+									{ title: 'Concept Code', data: 'concept.CONCEPT_CODE'},
+                  { title: 'Concept Name', render: renderBoundLink},
+                  { title: 'Domain', data: 'concept.DOMAIN_ID' },
+									{ title: 'Standard Concept Code', data: 'concept.STANDARD_CONCEPT', visible:false },
+									{ title: 'Standard Concept Caption', data: 'concept.STANDARD_CONCEPT_CAPTION' },
 									{ title: 'Exclude', class:'text-center', orderable:false,render: function() { return renderCheckbox('isExcluded');} },
 									{ title: 'Descendants', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeDescendants');} },
 									{ title: 'Mapped', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeMapped');} }
               ]
            }
         }">
-				</table>
+						</table>
 
-				<div id="panel-warnings" class="panel panel-default" data-bind="visible: selectedConceptsWarnings().length > 0">
-					<div class="panel-heading">Concept Set Warnings</div>
-					<div class="panel-body">
-						<div data-bind="foreach:selectedConceptsWarnings">
-							<div class="alert alert-danger" role="alert" data-bind="text:$data"></div>
+						<div class="linkLegend">
+							<div class="linkLegendItem">
+								<div class="swatch standard">
+								</div>
+								<div class="linkLegendTitle">Standard</div>
+							</div>
+							<div class="linkLegendItem">
+								<div class="swatch nonStandard">
+								</div>
+								<div class="linkLegendTitle">Non-Standard</div>
+							</div>
+							<div class="linkLegendItem">
+								<div class="swatch classification">
+								</div>
+								<div class="linkLegendTitle">Classification</div>
+							</div>
 						</div>
 					</div>
 				</div>
 
-				<div id="generated_codeset_container" data-bind="if:generated_codeset">
-					<div class="panel panel-default">
-						<div class="panel-heading">Export</div>
-						<div class="panel-body">
-							<pre data-bind="html: generated_codeset"></pre>
+			</div>
+
+			<div data-bind="if: currentView() == 'conceptset'">
+				<div class="wrapperTitle">
+					Concept Set
+				</div>
+
+				<ul class="nav nav-tabs">
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptSetMode('details');}, attr: {class: currentConceptSetMode() == 'details' ? 'active' : ''}"><a>Concept Set Expression</a>
+					</li>
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptSetMode('included');}, attr: {class: currentConceptSetMode() == 'included' ? 'active' : ''}">
+						<a>Included Concepts
+							<span class="badge" data-bind="if: !pageModel.resolvingConceptSetExpression()"><span data-bind="text:pageModel.conceptSetInclusionCount()"></span></span>
+							<span class="badge" data-bind="if: pageModel.resolvingConceptSetExpression();"><i class="fa fa-refresh fa-spin"></i></span></a>
+					</li>
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptSetMode('analysis');}, attr: {class: currentConceptSetMode() == 'analysis' ? 'active disabled' : 'disabled'}"><a>Analysis</a>
+					</li>
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptSetMode('export');}, attr: {class: currentConceptSetMode() == 'export' ? 'active disabled' : 'disabled'}"><a>Export</a>
+					</li>
+				</ul>
+				<div id="wrapperConceptSetAnalysis" data-bind="if: currentConceptSetMode() == 'analysis'">
+					<div id="wrapperAnalysisVisualization"></div>
+				</div>
+				<div id="wrapperConceptSetIncluded" data-bind="if: currentConceptSetMode() == 'included'">
+					<div id="wrapperIncludedTable">
+						<table width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+            data: pageModel.includedConcepts(),
+            options: {
+							dom: 'Clfiprt',
+								colVis: {
+									buttonText: 'Change Columns',
+									align: 'right',
+									overlayFade: 0,
+									showAll: 'Show All Columns',
+									restore: 'Reset Columns'
+								},
+								rowCallback: contextSensitiveLinkColor,
+								lengthMenu: [[20, 50, 100, -1], [20, 50, 100,'All']],
+								orderClasses: false,
+								deferRender: true,
+								autoWidth: false,
+								ordering: true,
+								order: [[ 2, 'asc' ]],
+								columns: [
+										{ title: '', render: renderConceptSelector, orderable:false, searchable:false},
+										{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
+										{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
+										{ title: 'Concept Name', data: 'CONCEPT_NAME', render: renderLink},
+										{ title: 'Class', data: 'CONCEPT_CLASS_ID' },
+										{ title: 'Standard Concept Caption', data: 'STANDARD_CONCEPT_CAPTION', visible: false},
+										{ title: 'Standard Concept Code', data: 'STANDARD_CONCEPT', visible: false},
+										{ title: 'Domain', data: 'DOMAIN_ID' },
+										{ title: 'Vocabulary', data: 'VOCABULARY_ID' }
+								]
+						}
+        }">
+						</table>
+
+						<div class="linkLegend">
+							<div class="linkLegendItem">
+								<div class="swatch standard">
+								</div>
+								<div class="linkLegendTitle">Standard</div>
+							</div>
+							<div class="linkLegendItem">
+								<div class="swatch nonStandard">
+								</div>
+								<div class="linkLegendTitle">Non-Standard</div>
+							</div>
+							<div class="linkLegendItem">
+								<div class="swatch classification">
+								</div>
+								<div class="linkLegendTitle">Classification</div>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-		</div>
-	</div>
-
-	<div id="search_panel_container">
-		<div id="searchpanel_searching">s e a r c h i n g . . .</div>
-		<div id="searchpanel_error"></div>
-		<div id="searchpanel_facets" data-bind="with:current_facet">
-			<div id="searchpanel_current_facet" data-bind="text:caption"></div>
-			<div id="searchpanel_facet" data-bind="foreach:Members.filter(function(m) {return m.ActiveCount > 0;})">
-				<div class="searchpanel_facets_facet" data-bind="click:$root.addFilter">
-					<div class="searchpanel_facet_hotkey" data-bind="text:$root.addHotkey(Name)"></div>
-					<div class=" searchpanel_facet_member">
-						<div class="searchpanel_facet_member_name">
-							<span data-bind="text:Name "></span>
-							<span data-bind="text:'&nbsp;(' + ActiveCount + ')'"></span>
+				<div id="wrapperConceptSet" data-bind="if: currentConceptSetMode() == 'details'">
+					<table class="conceptSetTable stripe compact hover" cellspacing="0" width="100%" data-bind="dataTable:{
+            data: pageModel.selectedConcepts(),
+            options: {
+							dom: 'Clfiprt',
+							colVis: {
+								buttonText: 'Change Columns',
+								align: 'right',
+								overlayFade: 0,
+								showAll: 'Show All Columns',
+								restore: 'Reset Columns'
+							},
+							rowCallback: contextSensitiveLinkColor,
+							lengthMenu: [[25, 50, 100, -1], [25, 50, 100,'All']],
+							orderClasses: false,
+							deferRender: true,
+							autoWidth: false,
+							order: [[3, 'desc']],
+              columns: [
+									{ title: '<li class=\'fa fa-shopping-cart\'></li>', render: renderConceptSetItemSelector, orderable:false, searchable:false},
+									{ title: 'Concept Id', data: 'concept.CONCEPT_ID', visible:false},
+									{ title: 'Concept Code', data: 'concept.CONCEPT_CODE'},
+                  { title: 'Concept Name', render: renderBoundLink},
+                  { title: 'Domain', data: 'concept.DOMAIN_ID' },
+									{ title: 'Standard Concept Code', data: 'concept.STANDARD_CONCEPT', visible:false },
+									{ title: 'Standard Concept Caption', data: 'concept.STANDARD_CONCEPT_CAPTION' },
+									{ title: 'Exclude', class:'text-center', orderable:false,render: function() { return renderCheckbox('isExcluded');} },
+									{ title: 'Descendants', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeDescendants');} },
+									{ title: 'Mapped', class:'text-center', orderable:false,render: function() { return renderCheckbox('includeMapped');} }
+              ]
+           }
+        }">
+					</table>
+					<div class="linkLegend">
+						<div class="linkLegendItem">
+							<div class="swatch standard">
+							</div>
+							<div class="linkLegendTitle">Standard</div>
 						</div>
-						<div class="searchpanel_facet_percent " data-bind="style: { width : ((ActiveCount / fe_search.GetMaxMemberLength(current_facet_index)) * 100) + '%'}"></div>
+						<div class="linkLegendItem">
+							<div class="swatch nonStandard">
+							</div>
+							<div class="linkLegendTitle">Non-Standard</div>
+						</div>
+						<div class="linkLegendItem">
+							<div class="swatch classification">
+							</div>
+							<div class="linkLegendTitle">Classification</div>
+						</div>
+					</div>
+					<button type="button" onclick="clearConceptSet()" class="btn btn-sm btn-primary selectAllButton">Clear Concept Set</button>
+					<div id="wrapperConceptSetWarnings" data-bind="visible: selectedConceptsWarnings().length > 0">
+						<div class="heading">Concept Set Warnings</div>
+						<table data-bind="foreach:selectedConceptsWarnings">
+							<tr class="conceptWarning">
+								<td><i class="fa fa-exclamation-triangle"></i>
+								</td>
+								<td><span class="conceptWarningText" data-bind="text:$data"></span>
+								</td>
+							</tr>
+						</table>
 					</div>
 				</div>
-			</div>
-		</div>
-		<div id="searchpanel_concept" data-bind="if:current_page_concepts().length > 0">
-			<div id="paging_container">
-				<div id="paging_info">
-					Page <span data-bind="text: $root.current_page() + 1"></span> / <span data-bind="text: $root.total_pages"></span>
-				</div>
-				<div id="paging_controls">
-					<span class="span_link" onclick="pageModel.previousPage();">&lt;&lt; Previous</span> <span class="span_link" onclick="pageModel.nextPage();">Next &gt;&gt;</span>
-				</div>
-			</div>
-			<div id="searchpanel_results " data-bind="foreach:current_page_concepts ">
-				<div class="searchpanel_concept " data-bind="click: $root.selectConcept">
-					<div class="searchpanel_concept_hotkey" data-bind="text: $root.addConceptHotkey($index() + 1)">
-					</div>
-					<div class="searchpanel_concept_name ">
-						<span data-bind="text:CONCEPT_NAME, attr: { class: INVALID_REASON == 'Valid' ? '' : 'invalid' } "></span>
-					</div>
-					<div>
-						<span class="searchpanel_concept_facet_info" data-bind="text:VOCABULARY_ID "></span>
-						<span class="searchpanel_concept_facet_info" data-bind="text:DOMAIN_ID "></span>
-						<span class="searchpanel_concept_facet_info" data-bind="text:CONCEPT_CODE "></span>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
 
+				<div id="wrapperConceptSetExport" data-bind="if: currentConceptSetMode() == 'export'">
+					<div class="heading">Concept Set Expression JSON</div>
+					<pre data-bind="html: currentConceptSetExpressionJson"></pre>
+					<div class="heading">Concept Identifer List</div>
+					<pre data-bind="html: currentConceptIdentifierList"></pre>
+					<div class="heading">Included Concept Identifer List</div>
+					<pre data-bind="html: currentIncludedConceptIdentifierList"></pre>
+				</div>
+
+			</div>
+
+			<div id="wrapperConcept" data-bind="if: currentConcept() && currentView() == 'concept'">
+				<div class="wrapperTitle" data-bind="with:currentConcept">
+					<span data-bind="css: {invalid: STANDARD_CONCEPT!='S'}, html:renderCurrentConceptSelector() + ' ' + CONCEPT_NAME"></span>
+				</div>
+
+				<ul class="nav nav-tabs">
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptMode('details');}, attr: {class: currentConceptMode() == 'details' ? 'active' : ''}"><a>Concept Details</a>
+					</li>
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptMode('related');}, attr: {class: currentConceptMode() == 'related' ? 'active' : ''}">
+						<a><span data-bind="if:pageModel.loadingRelated();">
+							<i class="fa fa-refresh fa-spin"></i>
+						</span>Related Concepts</a>
+					</li>
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptMode('hierarchy');}, attr: {class: currentConceptMode() == 'hierarchy' ? 'active' : ''}">
+						<a><span data-bind="if:pageModel.loadingRelated();">
+							<i class="fa fa-refresh fa-spin"></i>
+						</span>Hierarchy Viewer</a>
+					</li>
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptMode('evidence');}, attr: {class: currentConceptMode() == 'evidence' ? 'active disabled' : 'disabled'}">
+						<a>
+							<span data-bind="if:pageModel.loadingEvidence();">
+							<i class="fa fa-refresh fa-spin"></i>
+						</span>Evidence</a>
+					</li>
+					<li role="presentation" data-bind="click: function() {pageModel.currentConceptMode('data');}, attr: {class: currentConceptMode() == 'data' ? 'active disabled' : 'disabled'}"><a>Concept Incidence</a>
+					</li>
+				</ul>
+
+				<div id="wrapperConceptHierarchy" data-bind="if:pageModel.currentConceptMode() == 'hierarchy' && !pageModel.loadingRelated()">
+					<div id="wrapperParents">
+						<div class="heading">Broader Concepts</div>
+						<table width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+								data: pageModel.metarchy.parents(),
+								options: {
+									dom: 'fipt',
+									language: {
+										search: 'Filter Broader Concepts: '
+									},
+									rowCallback: contextSensitiveLinkColor,
+									lengthMenu: [[5,-1], [5,'All']],
+									orderClasses: false,
+									ordering: true,
+									order: [[ 2, 'asc' ]],
+									columns: [
+											{ title: '', render: renderConceptSelector, orderable:false, searchable:false},
+											{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
+											{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
+											{ title: 'Concept Name', data: 'CONCEPT_NAME', render: renderLink, width: '50%'},
+											{ title: 'Class', data: 'CONCEPT_CLASS_ID' },
+											{ title: 'Standard Concept Caption', data: 'STANDARD_CONCEPT_CAPTION', visible: false},
+											{ title: 'Standard Concept Code', data: 'STANDARD_CONCEPT', visible: false},
+											{ title: 'Domain', data: 'DOMAIN_ID' },
+											{ title: 'Vocabulary', data: 'VOCABULARY_ID', width: '100px' }
+									]
+							}
+						}">
+						</table>
+					</div>
+					<div id="wrapperSynonyms" data-bind="with:metarchy">
+						<div class="heading">Similar Concepts</div>
+						<table width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+								data: pageModel.metarchy.synonyms(),
+								options: {
+									dom: 'fipt',
+									language: {
+										search: 'Filter Similar Concepts: '
+									},
+									rowCallback: contextSensitiveLinkColor,
+									lengthMenu: [[5,-1], [5,'All']],
+									orderClasses: false,
+									ordering: true,
+									order: [[ 2, 'asc' ]],
+									columns: [
+											{ title: '', render: renderConceptSelector, orderable:false, searchable:false},
+											{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
+											{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
+											{ title: 'Concept Name', data: 'CONCEPT_NAME', render: renderLink, width: '50%'},
+											{ title: 'Class', data: 'CONCEPT_CLASS_ID' },
+											{ title: 'Standard Concept Caption', data: 'STANDARD_CONCEPT_CAPTION', visible: false},
+											{ title: 'Standard Concept Code', data: 'STANDARD_CONCEPT', visible: false},
+											{ title: 'Domain', data: 'DOMAIN_ID' },
+											{ title: 'Vocabulary', data: 'VOCABULARY_ID', width: '100px' }
+									]
+							}
+						}">
+						</table>
+					</div>
+					<div id="wrapperChildren" data-bind="with:metarchy">
+						<div class="heading">More Specific Concepts</div>
+						<table width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+								data: pageModel.metarchy.children(),
+								language: {
+									search: 'Filter Specific Concepts: '
+								},
+								options: {
+									dom: 'fipt',
+									rowCallback: contextSensitiveLinkColor,
+									lengthMenu: [[5,-1], [5,'All']],
+									orderClasses: false,
+									ordering: true,
+									order: [[ 2, 'asc' ]],
+									columns: [
+											{ title: '', render: renderConceptSelector, orderable:false, searchable:false},
+											{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
+											{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
+											{ title: 'Concept Name', data: 'CONCEPT_NAME', render: renderLink, width: '50%'},
+											{ title: 'Class', data: 'CONCEPT_CLASS_ID' },
+											{ title: 'Standard Concept Caption', data: 'STANDARD_CONCEPT_CAPTION', visible: false},
+											{ title: 'Standard Concept Code', data: 'STANDARD_CONCEPT', visible: false},
+											{ title: 'Domain', data: 'DOMAIN_ID' },
+											{ title: 'Vocabulary', data: 'VOCABULARY_ID', width: '100px' }
+									]
+							}
+						}">
+						</table>
+					</div>
+				</div>
+
+				<div id="wrapperConceptEvidence" data-bind="if:pageModel.currentConceptMode() == 'evidence' && !pageModel.loadingEvidence()">
+					<table width="100%" class="stripe compact hover" cellspacing="0" data-bind="dataTable:{
+            data: pageModel.evidence(),
+            options: {
+							dom: 'Clfiprt',
+							colVis: {
+								buttonText: 'Change Columns',
+								align: 'right',
+								overlayFade: 0,
+								showAll: 'Show All Columns',
+								restore: 'Reset Columns'
+							},
+							lengthMenu: [[20, 50, 100, -1], [20, 50, 100,'All']],
+							deferRender: true,
+							orderClasses: false,
+							autoWidth: false,
+							ordering: true,
+							order: [[ 2, 'asc' ]],
+							columns: [
+									{ title: 'Evidence Type', data: 'evidenceType'},
+									{ title: 'Link Out', data: 'linkout'},
+									{ title: 'Drug Name', data: 'drugName'},
+									{ title: 'Condition Name', data: 'conditionName'},
+									{ title: 'Value', data: 'value' }
+							]
+					}
+        }">
+					</table>
+				</div>
+
+				<div id="wrapperConceptDetails" data-bind="if:pageModel.currentConceptMode() == 'details'">
+					<table data-bind="with: currentConcept">
+						<thead>
+							<tr>
+								<th>Property</th>
+								<th>Value</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Concept Name</td>
+								<td data-bind="text:CONCEPT_NAME"></td>
+							</tr>
+							<tr>
+								<td>Domain Id</td>
+								<td data-bind="text:DOMAIN_ID"></td>
+							</tr>
+							<tr>
+								<td>Concept Class Id</td>
+								<td data-bind="text:CONCEPT_CLASS_ID"></td>
+							</tr>
+							<tr>
+								<td>Vocabulary Id</td>
+								<td data-bind="text:VOCABULARY_ID"></td>
+							</tr>
+							<tr>
+								<td>Concept Id</td>
+								<td data-bind="text:CONCEPT_ID"></td>
+							</tr>
+							<tr>
+								<td>Concept Code</td>
+								<td data-bind="text:CONCEPT_CODE"></td>
+							</tr>
+							<tr>
+								<td>Invalid Reason</td>
+								<td data-bind="text:INVALID_REASON_CAPTION, attr: { class: INVALID_REASON_CAPTION == 'Valid' ? '' : 'invalid'}"></td>
+							</tr>
+							<tr>
+								<td>Standard Concept</td>
+								<td data-bind="text:STANDARD_CONCEPT_CAPTION, attr: { class: STANDARD_CONCEPT_CAPTION == 'Standard' ? '' : 'invalid'}"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div id="wrapperRelatedConcepts" data-bind="if: pageModel.currentConceptMode() == 'related' && !pageModel.loadingRelated()">
+					<div id="wrapperRelatedConceptsFilter" class="feFilter" data-bind="with: feRelated">
+						<div data-bind="foreach:Facets">
+							<div class="facetName" data-bind="text:caption"></div>
+							<div class="facetScrollBox" data-bind="foreach:Members">
+								<div class="facetMemberName" data-bind="attr: {id: $parentContext.$index() + '-' + $index()}, click: function() { pageModel.updateRelatedFilters(); }, css : {selected: Selected}, text:Name + ' (' + ActiveCount + ')'">
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div id="wrapperRelatedConceptsTable">
+						<table width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+            data: pageModel.relatedConcepts(),
+						language: {
+							search: 'Filter: '
+						},
+            options: {
+							dom: 'Clfiprt',
+							colVis: {
+								buttonText: 'Change Columns',
+								align: 'right',
+								overlayFade: 0,
+								showAll: 'Show All Columns',
+								restore: 'Reset Columns'
+							},
+							rowCallback: contextSensitiveLinkColor,
+							lengthMenu: [[20, 50, 100, -1], [20, 50, 100,'All']],
+							orderClasses: false,
+							deferRender: true,
+							autoWidth: false,
+							ordering: true,
+							order: [[ 2, 'asc' ]],
+							columns: [
+									{ title: '<li onclick=\'selectAllRelated();\' class=\'fa fa-shopping-cart\'></li>', render: renderConceptSelector, orderable:false, searchable:false},
+									{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
+									{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
+									{ title: 'Concept Name', data: 'CONCEPT_NAME', render: renderLink},
+									{ title: 'Class', data: 'CONCEPT_CLASS_ID' },
+									{ title: 'Standard Concept Caption', data: 'STANDARD_CONCEPT_CAPTION', visible: false},
+									{ title: 'Standard Concept Code', data: 'STANDARD_CONCEPT', visible: false},
+									{ title: 'Domain', data: 'DOMAIN_ID' },
+									{ title: 'Vocabulary', data: 'VOCABULARY_ID' }
+							]
+					}
+        }">
+						</table>
+						<div class="linkLegend">
+							<div class="linkLegendItem">
+								<div class="swatch standard">
+								</div>
+								<div class="linkLegendTitle">Standard</div>
+							</div>
+							<div class="linkLegendItem">
+								<div class="swatch nonStandard">
+								</div>
+								<div class="linkLegendTitle">Non-Standard</div>
+							</div>
+							<div class="linkLegendItem">
+								<div class="swatch classification">
+								</div>
+								<div class="linkLegendTitle">Classification</div>
+							</div>
+						</div>
+						<button type="button" onclick="selectAllRelated()" class="btn btn-sm btn-primary selectAllButton">Select All Related</button>
+					</div>
+				</div>
+
+			</div>
+			<div id="wrapperSearch" data-bind="if: currentView() == 'search'">
+				<div class="wrapperTitle">Search</div>
+				<div class="paddedWrapper">
+					<input id="querytext" placeholder="type your search here" class="form-control" type="text" data-bind="event: { keyup: checkExecuteSearch}" />
+
+
+					<div id="helpMinimumQueryLength" class="modal fade">
+						<div class="modal-dialog">
+							<div class="modal-content">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="modal-body">
+									<p>Search string must be at least 3 characters long.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+						<div class="modal-dialog modal-sm">
+							<div class="modal-content">
+								search string must be at least 3 characters long
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			<div id="wrapperSearchResults" data-bind="if: currentView() == 'searchResults'">
+				<div>
+					<div class="wrapperTitle" data-bind="text: 'Search Results for ' + decodeURI(pageModel.currentSearch())"></div>
+				</div>
+				<div style="position:relative;">
+					<div id="wrapperSearchResultsFilter" class="feFilter" data-bind="with: feSearch">
+						<div data-bind="foreach:Facets">
+							<div class="facetName" data-bind="text:caption"></div>
+							<div class="facetScrollBox" data-bind="foreach:Members">
+								<div class="facetMemberName" data-bind="attr: {id: $parentContext.$index() + '-' + $index()}, click: function() { pageModel.updateSearchFilters(); }, css : {selected: Selected}, text:Name + ' (' + ActiveCount + ')'">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div id="wrapperSearchResultsTable">
+					<table id="tableSearchResults" width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+            data: pageModel.searchResultsConcepts(),
+            options: {
+							dom: 'Clfiprt',
+							language: {
+								search: 'Filter: '
+							},
+							rowCallback: contextSensitiveLinkColor,
+							lengthMenu: [[20, 50, 100, -1], [20, 50, 100,'All']],
+							orderClasses: false,
+							ordering: true,
+							order: [[ 2, 'asc' ]],
+							columns: [
+									{ title: '', render: renderConceptSelector, orderable:false, searchable:false},
+									{ title: 'Concept Id', data: 'CONCEPT_ID', visible: false},
+									{ title: 'Concept Code', data: 'CONCEPT_CODE', visible: false},
+									{ title: 'Concept Name', data: 'CONCEPT_NAME', render: renderLink, width: '50%'},
+									{ title: 'Class', data: 'CONCEPT_CLASS_ID' },
+									{ title: 'Standard Concept Caption', data: 'STANDARD_CONCEPT_CAPTION', visible: false},
+									{ title: 'Standard Concept Code', data: 'STANDARD_CONCEPT', visible: false},
+									{ title: 'Data Density', data: 'DENSITY', className:'numeric'},
+									{ title: 'Domain', data: 'DOMAIN_ID' },
+									{ title: 'Vocabulary', data: 'VOCABULARY_ID', width: '100px' }
+							]
+					}
+        }">
+					</table>
+					<div class="linkLegend">
+						<div class="linkLegendItem">
+							<div class="swatch standard">
+							</div>
+							<div class="linkLegendTitle">Standard</div>
+						</div>
+						<div class="linkLegendItem">
+							<div class="swatch nonStandard">
+							</div>
+							<div class="linkLegendTitle">Non-Standard</div>
+						</div>
+						<div class="linkLegendItem">
+							<div class="swatch classification">
+							</div>
+							<div class="linkLegendTitle">Classification</div>
+						</div>
+					</div>
+					<button type="button" onclick="selectAllSearchResults()" class="btn btn-sm btn-primary selectAllButton">Select All Search Results</button>
+				</div>
+			</div>
+
+		</div>
 </body>
 
 </html>
