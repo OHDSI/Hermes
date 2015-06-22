@@ -20,7 +20,7 @@ div.offscreen {
 	fill: rgb(68, 68, 136);
 }
 .bar {
-	fill: #1f77b4;
+	fill: #768EA0;
 }
 /* Barchart styles */
 
@@ -85,7 +85,7 @@ table.boxplotValues tr td
 }
 .axis text {
 	font-family: arial;
-	font-size: 8px;
+	font-size: 6px;
 }
 .axislabel {
 	font-family: arial;
@@ -105,7 +105,7 @@ table.data td {
 }
 .g-label-value,
 .g-label-year {
-	font-size: 10px;
+	font-size: 5px;
 }
 .trellisLegend {
 	font-size: 10px;

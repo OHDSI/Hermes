@@ -1,7 +1,7 @@
 (function (root, factory) {
 	if (typeof define === 'function' && define.amd) {
 		// AMD. Register as an anonymous module with d3 as a dependency.
-		define(["jquery", "d3", "d3/tip"], factory)
+		define(["jquery", "d3", "d3_tip"], factory)
 	} else {
 		// Browser global.
 		root.jnj_chart = factory(root.$, root.d3)
@@ -43,6 +43,8 @@
 	}
 
 	var intFormat = d3.format("0,000");
+	var commaseparated = d3.format(',');
+	var formatpercent = d3.format('.1%');
 
 	module.util.formatInteger = function (d) {
 		return intFormat(d);
@@ -72,6 +74,30 @@
 		}
 	}
 
+	function tooltipFactory(tooltips) {
+		return function (d) {
+			var tipText = "";
+
+			if (tooltips != undefined) {
+				for (var i = 0; i < tooltips.length; i++) {
+					var value = tooltips[i].accessor(d);
+					if (tooltips[i].format != undefined) {
+						value = tooltips[i].format(value);
+					}
+					tipText += tooltips[i].label + ": " + value + '</br>';
+				}
+			}
+
+			return tipText;
+		}
+	}
+
+	function donut_defaultTooltip(labelAccessor, valueAccessor, percentageAccessor) {
+		return function (d) {
+			return labelAccessor(d) + ": " + valueAccessor(d) + " (" + percentageAccessor(d) + ")";
+		}
+	}
+
 	module.donut = function () {
 
 		this.render = function (data, target, w, h, options) {
@@ -97,12 +123,27 @@
 				total += +d.value;
 			});
 
+			var tooltipBuilder = donut_defaultTooltip(function (d) {
+				return d.data.label;
+			}, function (d) {
+				return intFormat(d.data.value);
+			}, function (d) {
+				return formatpercent(total != 0 ? d.data.value / total : 0.0);
+			});
+
 			var chart = d3.select(target)
 				.append("svg:svg")
 				.data([data])
 				.attr("width", w)
 				.attr("height", h)
 				.attr("viewBox", "0 0 " + w + " " + h);
+
+			var tip = d3.tip()
+				.attr('class', 'd3-tip')
+				.direction('s')
+				.offset([3, 0])
+				.html(tooltipBuilder);
+			chart.call(tip);
 
 			if (data.length > 0) {
 				var vis = chart.append("g")
@@ -136,6 +177,8 @@
 					.attr("title", function (d) {
 						return d.label;
 					})
+					.on('mouseover', tip.show)
+					.on('mouseout', tip.hide)
 					.attr("d", arc); //this creates the actual SVG path using the associated data (pie) with the arc drawing function
 
 				legend.selectAll('rect')
@@ -297,8 +340,13 @@
 					.style("text-anchor", "middle")
 					.text(options.xLabel);
 
-				var bbox = xAxisLabel.node().getBBox();
-				xAxisLabelHeight = bbox.height;
+				var bboxNode = xAxisLabel.node();
+				if (bboxNode) {
+					var bbox = bboxNode.getBBox();
+					if (bbox) {
+						xAxisLabelHeight = bbox.height;
+					}
+				}
 			}
 
 			if (options.yLabel) {
@@ -313,8 +361,13 @@
 					.style("text-anchor", "middle")
 					.text(options.yLabel);
 
-				var bbox = yAxisLabel.node().getBBox();
-				yAxisLabelWidth = 1.5 * bbox.width; // width is calculated as 1.5 * box height due to rotation anomolies that cause the y axis label to appear shifted.
+				var bboxNode = yAxisLabel.node();
+				if (bboxNode) {
+					var bbox = bboxNode.getBBox();
+					if (bbox) {
+						yAxisLabelWidth = 1.5 * bbox.width; // width is calculated as 1.5 * box height due to rotation anomolies that cause the y axis label to appear shifted.
+					}
+				}
 			}
 
 			// calculate an intial width and height that does not take into account the tick text dimensions
@@ -352,22 +405,26 @@
 			var tempXAxis = chart.append("g").attr("class", "axis");
 			tempXAxis.call(xAxis);
 
-			// update width & height based on temp xaxis dimension and remove
-			var xAxisHeight = Math.round(tempXAxis.node().getBBox().height);
-			var xAxisWidth = Math.round(tempXAxis.node().getBBox().width);
-			height = height - xAxisHeight;
-			width = width - Math.max(0, (xAxisWidth - width)); // trim width if xAxisWidth bleeds over the allocated width.
-			tempXAxis.remove();
 
+			if (tempXAxis.node() && tempXAxis.node().getBBox()) {
+				// update width & height based on temp xaxis dimension and remove
+				var xAxisHeight = Math.round(tempXAxis.node().getBBox().height);
+				var xAxisWidth = Math.round(tempXAxis.node().getBBox().width);
+				height = height - xAxisHeight;
+				width = width - Math.max(0, (xAxisWidth - width)); // trim width if xAxisWidth bleeds over the allocated width.
+				tempXAxis.remove();
 
+			}
 			// create temporary y axis
 			var tempYAxis = chart.append("g").attr("class", "axis");
 			tempYAxis.call(yAxis);
 
-			// update height based on temp xaxis dimension and remove
-			var yAxisWidth = Math.round(tempYAxis.node().getBBox().width);
-			width = width - yAxisWidth;
-			tempYAxis.remove();
+			if (tempYAxis.node() && tempYAxis.node().getBBox()) {
+				// update height based on temp xaxis dimension and remove
+				var yAxisWidth = Math.round(tempYAxis.node().getBBox().width);
+				width = width - yAxisWidth;
+				tempYAxis.remove();
+			}
 
 			if (options.boxplot) {
 				height -= 12; // boxplot takes up 12 vertical space
@@ -472,8 +529,10 @@
 					.style("text-anchor", "middle")
 					.text(options.xLabel);
 
-				var bbox = xAxisLabel.node().getBBox();
-				options.margin.bottom += bbox.height + 5;
+				if (xAxisLabel.node()) {
+					var bbox = xAxisLabel.node().getBBox();
+					options.margin.bottom += bbox.height + 5;
+				}
 			}
 
 			if (options.yLabel) {
@@ -488,8 +547,10 @@
 					.style("text-anchor", "middle")
 					.text(options.yLabel);
 
-				var bbox = yAxisLabel.node().getBBox();
-				options.margin.left += bbox.width + 5;
+				if (yAxisLabel.node()) {
+					var bbox = yAxisLabel.node().getBBox();
+					options.margin.left += bbox.width + 5;
+				}
 			}
 
 			options.margin.left += options.tickPadding;
@@ -848,67 +909,57 @@
 
 	/* NOT IMPLEMENTED */
 	/*
-		module.stackedarea = function () {
-			this.render = function (data, target, w, h, options) {
-				var defaults = {
-					margin: {
-						top: 10,
-						right: 10,
-						bottom: 10,
-						left: 10
-					},
-					xFormat: d3.format(',.0f'),
-					yFormat: d3.format('s'),
-					xValue: "xValue",
-					yValue: "yValue",
-					colors = d3.scale.category10()
-
-				};
-				var options = $.extend({}, defaults, options);
-
-				var chart = d3.select(target)
-					.append("svg:svg")
-					.data(data)
-					.attr("width", w)
-					.attr("height", h)
-					.attr("viewBox", "0 0 " + w + " " + h);
-
-				// apply labels (if specified) and offset margins accordingly
-				if (options.xLabel) {
-					var xAxisLabel = chart.append("g")
-						.attr("transform", "translate(" + w / 2 + "," + (h - options.margin.bottom) + ")")
-
-					xAxisLabel.append("text")
-						.attr("class", "axislabel")
-						.style("text-anchor", "middle")
-						.text(options.xLabel);
-
-					var bbox = xAxisLabel.node().getBBox();
-					options.margin.bottom += bbox.height + 10;
-				}
-
-				if (options.yLabel) {
-					var yAxisLabel = chart.append("g")
-						.attr("transform", "translate(0," + (((h - options.margin.bottom - options.margin.top) / 2) + options.margin.top) + ")");
-					yAxisLabel.append("text")
-						.attr("class", "axislabel")
-						.attr("transform", "rotate(-90)")
-						.attr("y", 0)
-						.attr("x", 0)
-						.attr("dy", "1em")
-						.style("text-anchor", "middle")
-						.text(options.yLabel);
-
-					var bbox = yAxisLabel.node().getBBox();
-					options.margin.left += bbox.width;
-				}
-
-				var width = w - options.margin.left - options.margin.right;
-				var height = h - options.margin.top - options.margin.bottom;
-
-
-			}
-*/
+	 module.stackedarea = function () {
+	 this.render = function (data, target, w, h, options) {
+	 var defaults = {
+	 margin: {
+	 top: 10,
+	 right: 10,
+	 bottom: 10,
+	 left: 10
+	 },
+	 xFormat: d3.format(',.0f'),
+	 yFormat: d3.format('s'),
+	 xValue: "xValue",
+	 yValue: "yValue",
+	 colors = d3.scale.category10()
+	 };
+	 var options = $.extend({}, defaults, options);
+	 var chart = d3.select(target)
+	 .append("svg:svg")
+	 .data(data)
+	 .attr("width", w)
+	 .attr("height", h)
+	 .attr("viewBox", "0 0 " + w + " " + h);
+	 // apply labels (if specified) and offset margins accordingly
+	 if (options.xLabel) {
+	 var xAxisLabel = chart.append("g")
+	 .attr("transform", "translate(" + w / 2 + "," + (h - options.margin.bottom) + ")")
+	 xAxisLabel.append("text")
+	 .attr("class", "axislabel")
+	 .style("text-anchor", "middle")
+	 .text(options.xLabel);
+	 var bbox = xAxisLabel.node().getBBox();
+	 options.margin.bottom += bbox.height + 10;
+	 }
+	 if (options.yLabel) {
+	 var yAxisLabel = chart.append("g")
+	 .attr("transform", "translate(0," + (((h - options.margin.bottom - options.margin.top) / 2) + options.margin.top) + ")");
+	 yAxisLabel.append("text")
+	 .attr("class", "axislabel")
+	 .attr("transform", "rotate(-90)")
+	 .attr("y", 0)
+	 .attr("x", 0)
+	 .attr("dy", "1em")
+	 .style("text-anchor", "middle")
+	 .text(options.yLabel);
+	 var bbox = yAxisLabel.node().getBBox();
+	 options.margin.left += bbox.width;
+	 }
+	 var width = w - options.margin.left - options.margin.right;
+	 var height = h - options.margin.top - options.margin.bottom;
+	 }
+	 */
 
 	module.line = function () {
 		this.render = function (data, target, w, h, options) {
@@ -929,6 +980,8 @@
 				ticks: 10,
 				showSeriesLabel: false,
 				colorScale: null,
+				labelIndexDate: false,
+				colorBasedOnIndex: false
 			};
 			var options = $.extend({}, defaults, options);
 
@@ -960,7 +1013,7 @@
 						{
 							name: '',
 							values: data
-							}];
+                        }];
 				}
 				chart.data(data)
 
@@ -1108,12 +1161,15 @@
 				y.range([height, 0]);
 
 				// create a line function that can convert data[] into x and y points
+
 				var line = d3.svg.line()
 					.x(function (d) {
-						return x(d[options.xValue]);
+						var xPos = x(d[options.xValue]);
+						return xPos;
 					})
 					.y(function (d) {
-						return y(d[options.yValue]);
+						var yPos = y(d[options.yValue]);
+						return yPos;
 					})
 					.interpolate(options.interpolate);
 
@@ -1132,13 +1188,16 @@
 						return line(d.values.sort(function (a, b) {
 							return d3.ascending(a[options.xValue], b[options.xValue]);
 						}));
-					});
+					})
 
-				if (options.colors) {
+				if (options.colorBasedOnIndex) {
+
+				} else if (options.colors) {
 					seriesLines.style("stroke", function (d) {
 						return options.colors(d.name);
 					})
 				}
+
 
 				if (options.showSeriesLabel) {
 					series.append("text")
@@ -1158,7 +1217,10 @@
 							return d.name;
 						});
 				}
-
+				var indexPoints = {
+					x: 0,
+					y: 0
+				};
 				series.selectAll(".focus")
 					.data(function (series) {
 						return series.values;
@@ -1168,7 +1230,13 @@
 					.attr("class", "focus")
 					.attr("r", 4)
 					.attr("transform", function (d) {
-						return "translate(" + x(d[options.xValue]) + "," + y(d[options.yValue]) + ")";
+						var xVal = x(d[options.xValue]);
+						var yVal = y(d[options.yValue]);
+						if (d[options.xValue] === 0 && indexPoints.y === 0) {
+							indexPoints.x = xVal;
+							indexPoints.y = yVal;
+						}
+						return "translate(" + xVal + "," + yVal + ")";
 					})
 					.on('mouseover', function (d) {
 						d3.select(this).style("opacity", "1");
@@ -1187,6 +1255,16 @@
 				vis.append("g")
 					.attr("class", "y axis")
 					.call(yAxis)
+
+
+				if (options.labelIndexDate) {
+					vis.append("rect")
+						.attr("transform", function () {
+							return "translate(" + (indexPoints.x - 0.5) + "," + indexPoints.y + ")";
+						})
+						.attr("width", 1)
+						.attr("height", height);
+				}
 
 			} else {
 				chart.append("text")
@@ -1213,7 +1291,335 @@
 				$(window).trigger('resize');
 			}, 0);
 		}
-	}
+	};
+
+	module.scatterplot = function () {
+		this.render = function (data, target, w, h, options) {
+			var defaults = {
+				margin: {
+					top: 5,
+					right: 5,
+					bottom: 5,
+					left: 5
+				},
+				xFormat: module.util.formatSI(3),
+				yFormat: module.util.formatSI(3),
+				interpolate: "linear",
+				seriesName: "SERIES_NAME",
+				xValue: "xValue",
+				yValue: "yValue",
+				cssClass: "lineplot",
+				ticks: 10,
+				showSeriesLabel: false,
+				colorScale: null,
+				labelIndexDate: false,
+				colorBasedOnIndex: false,
+				showXAxis: true
+			};
+			var options = $.extend({}, defaults, options);
+
+			/*
+				// old school tooltip logic
+				options.xLabel || "x", options.xFormat, function (d) {
+									return d[options.xValue];
+								},
+								options.yLabel || "y", options.yFormat,
+								function (d) {
+									return d[options.yValue];
+								},
+								function (d) {
+									return d[options.seriesName];
+								},
+			*/
+
+			var tooltipBuilder = tooltipFactory(options.tooltips);
+
+			var offscreen = $('<div class="offscreen"></div>').appendTo('body');
+
+			var chart = d3.select(offscreen[0])
+				.append("svg:svg")
+				.attr("width", w)
+				.attr("height", h)
+				.attr("viewBox", "0 0 " + w + " " + h);
+
+			if (data.length > 0) {
+
+				// convert data to multi-series format if not already formatted
+				if (!data[0].hasOwnProperty("values")) {
+					// assumes data is just an array of values (single series)
+					data = [
+						{
+							name: '',
+							values: data
+                        }];
+				}
+				chart.data(data)
+
+				var focusTip = d3.tip()
+					.attr('class', 'd3-tip')
+					.offset([-10, 0])
+					.html(tooltipBuilder);
+				chart.call(focusTip);
+
+				var xAxisLabelHeight = 0;
+				var yAxisLabelWidth = 0;
+
+				// apply labels (if specified) and offset margins accordingly
+				if (options.xLabel) {
+					var xAxisLabel = chart.append("g")
+						.attr("transform", "translate(" + w / 2 + "," + (h - options.margin.bottom) + ")")
+
+					xAxisLabel.append("text")
+						.attr("class", "axislabel")
+						.style("text-anchor", "middle")
+						.text(options.xLabel);
+
+					var bbox = xAxisLabel.node().getBBox();
+					xAxisLabelHeight += bbox.height;
+				}
+
+				if (options.yLabel) {
+					var yAxisLabel = chart.append("g")
+						.attr("transform", "translate(" + options.margin.left + "," + (((h - options.margin.bottom - options.margin.top) / 2) + options.margin.top) + ")");
+					yAxisLabel.append("text")
+						.attr("class", "axislabel")
+						.attr("transform", "rotate(-90)")
+						.attr("y", 0)
+						.attr("x", 0)
+						.attr("dy", "1em")
+						.style("text-anchor", "middle")
+						.text(options.yLabel);
+
+					var bbox = yAxisLabel.node().getBBox();
+					yAxisLabelWidth = 1.5 * bbox.width; // width is calculated as 1.5 * box height due to rotation anomolies that cause the y axis label to appear shifted.
+				}
+
+				var legendWidth = 0;
+				if (options.showLegend) {
+					var legend = chart.append("g")
+						.attr("class", "legend");
+
+					var maxWidth = 0;
+
+					data.forEach(function (d, i) {
+						legend.append("rect")
+							.attr("x", 0)
+							.attr("y", (i * 15))
+							.attr("width", 10)
+							.attr("height", 10)
+							.style("fill", options.colors(d.name));
+
+						var legendItem = legend.append("text")
+							.attr("x", 12)
+							.attr("y", (i * 15) + 9)
+							.text(d.name);
+						maxWidth = Math.max(legendItem.node().getBBox().width + 12, maxWidth);
+					});
+					legend.attr("transform", "translate(" + (w - options.margin.right - maxWidth) + ",0)")
+					legendWidth += maxWidth + 5;
+				}
+
+				// calculate an intial width and height that does not take into account the tick text dimensions
+				var width = w - options.margin.left - options.margin.right - yAxisLabelWidth - legendWidth;
+				var height = h - options.margin.top - options.margin.bottom - xAxisLabelHeight;
+
+				// define the intial scale (range will be updated after we determine the final dimensions)
+				var x = options.xScale || d3.scale.linear()
+					.domain([d3.min(data, function (d) {
+						return d3.min(d.values, function (d) {
+							return d[options.xValue];
+						});
+					}), d3.max(data, function (d) {
+						return d3.max(d.values, function (d) {
+							return d[options.xValue];
+						});
+					})]);
+
+				var xAxis = d3.svg.axis()
+					.scale(x)
+					.ticks(options.ticks)
+					.orient("bottom");
+
+				// check for custom tick formatter
+				if (options.tickFormat) {
+					xAxis.tickFormat(options.tickFormat);
+				} else // apply standard formatter
+				{
+					xAxis.tickFormat(options.xFormat);
+				}
+
+				// if x scale is ordinal, then apply rangeRoundBands, else apply standard range.
+				if (typeof x.rangePoints === 'function') {
+					x.rangePoints([0, width]);
+				} else {
+					x.range([0, width]);
+				}
+
+				var y = options.yScale || d3.scale.linear()
+					.domain([0, d3.max(data, function (d) {
+						return d3.max(d.values, function (d) {
+							return d[options.yValue];
+						});
+					})])
+					.range([height, 0]);
+
+				var yAxis = d3.svg.axis()
+					.scale(y)
+					.tickFormat(options.yFormat)
+					.ticks(4)
+					.orient("left");
+
+				// create temporary x axis
+				var tempXAxis = chart.append("g").attr("class", "axis");
+				tempXAxis.call(xAxis);
+				var xAxisHeight = Math.round(tempXAxis.node().getBBox().height);
+				var xAxisWidth = Math.round(tempXAxis.node().getBBox().width);
+				height = height - xAxisHeight;
+				width = width - Math.max(0, (xAxisWidth - width)); // trim width if xAxisWidth bleeds over the allocated width.
+				tempXAxis.remove();
+
+				// create temporary y axis
+				var tempYAxis = chart.append("g").attr("class", "axis");
+				tempYAxis.call(yAxis);
+
+				// update height based on temp xaxis dimension and remove
+				var yAxisWidth = Math.round(tempYAxis.node().getBBox().width);
+				width = width - yAxisWidth;
+				tempYAxis.remove();
+
+				// reset axis ranges
+				// if x scale is ordinal, then apply rangeRoundBands, else apply standard range.
+				if (typeof x.rangePoints === 'function') {
+					x.rangePoints([0, width]);
+				} else {
+					x.range([0, width]);
+				}
+				y.range([height, 0]);
+
+				var vis = chart.append("g")
+					.attr("class", options.cssClass)
+					.attr("transform", "translate(" + (options.margin.left + yAxisLabelWidth + yAxisWidth) + "," + options.margin.top + ")");
+
+				var series = vis.selectAll(".series")
+					.data(data)
+					.enter()
+					.append("g");
+
+				var seriesDots = series
+					.selectAll(".dot")
+					.data(function (series) {
+						return series.values;
+					})
+					.enter()
+					.append("circle")
+					.attr("class", "dot")
+					.attr("r", 1)
+					.style("fill", function (d) {
+						return options.colors(d[options.seriesName]);
+					})
+					.attr("transform", function (d) {
+						var xVal = x(d[options.xValue]);
+						var yVal = y(d[options.yValue]);
+						return "translate(" + xVal + "," + yVal + ")";
+					});
+
+
+				if (options.showSeriesLabel) {
+					series.append("text")
+						.datum(function (d) {
+							return {
+								name: d.name,
+								value: d.values[d.values.length - 1]
+							};
+						})
+						.attr("transform", function (d) {
+							return "translate(" + x(d.value[options.xValue]) + "," + y(d.value[options.yValue]) + ")";
+						})
+						.attr("x", 3)
+						.attr("dy", 2)
+						.style("font-size", "8px")
+						.text(function (d) {
+							return d.name;
+						});
+				}
+
+				var indexPoints = {
+					x: 0,
+					y: 0
+				};
+				series.selectAll(".focus")
+					.data(function (series) {
+						return series.values;
+					})
+					.enter()
+					.append("circle")
+					.attr("class", "focus")
+					.attr("r", 1)
+					.attr("transform", function (d) {
+						var xVal = x(d[options.xValue]);
+						var yVal = y(d[options.yValue]);
+						if (d[options.xValue] === 0 && indexPoints.y === 0) {
+							indexPoints.x = xVal;
+							indexPoints.y = yVal;
+						}
+						return "translate(" + xVal + "," + yVal + ")";
+					})
+					.on('mouseover', function (d) {
+						d3.select(this).style("opacity", "1");
+						focusTip.show(d);
+					})
+					.on('mouseout', function (d) {
+						d3.select(this).style("opacity", "0");
+						focusTip.hide(d);
+					});
+
+				if (options.showXAxis) {
+					vis.append("g")
+						.attr("class", "x axis")
+						.attr("transform", "translate(0," + height + ")")
+						.call(xAxis);
+				}
+
+				vis.append("g")
+					.attr("class", "y axis")
+					.call(yAxis)
+
+
+				if (options.labelIndexDate) {
+					vis.append("rect")
+						.attr("transform", function () {
+							return "translate(" + (indexPoints.x - 0.5) + "," + indexPoints.y + ")";
+						})
+						.attr("width", 1)
+						.attr("height", height);
+				}
+
+			} else {
+				chart.append("text")
+					.attr("transform", "translate(" + (w / 2) + "," + (h / 2) + ")")
+					.style("text-anchor", "middle")
+					.text("No Data");
+			}
+
+			$(target).append(offscreen);
+			$(offscreen).removeClass('offscreen');
+
+			var resizeHandler = $(window).on("resize", {
+					container: $(offscreen),
+					chart: $(offscreen).children('svg'),
+					aspect: w / h
+				},
+				function (event) {
+					var targetWidth = event.data.container.width();
+					event.data.chart.attr("width", targetWidth);
+					event.data.chart.attr("height", Math.round(targetWidth / event.data.aspect));
+				});
+
+			setTimeout(function () {
+				$(window).trigger('resize');
+			}, 0);
+		}
+	};
 
 	module.trellisline = function () {
 		var self = this;
@@ -1257,14 +1663,14 @@
 			var minY = d3.min(dataByTrellis, function (trellis) {
 					return d3.min(trellis.values, function (series) {
 						return d3.min(series.values, function (d) {
-							return d.Y_PREVALENCE_1000PP;
+							return d.Y_PREVALENCE_1000PP ? d.Y_PREVALENCE_1000PP : d.yPrevalence1000Pp;
 						});
 					});
 				}),
 				maxY = d3.max(dataByTrellis, function (trellis) {
 					return d3.max(trellis.values, function (series) {
 						return d3.max(series.values, function (d) {
-							return d.Y_PREVALENCE_1000PP;
+							return d.Y_PREVALENCE_1000PP ? d.Y_PREVALENCE_1000PP : d.yPrevalence1000Pp;
 						});
 					});
 				});
@@ -1290,7 +1696,9 @@
 					.style("text-anchor", "middle")
 					.attr("dy", ".79em")
 					.text(options.seriesLabel);
-				seriesLabelHeight = seriesLabel.node().getBBox().height + 10;
+				if (seriesLabelHeight = seriesLabel.node()) {
+					seriesLabelHeight = seriesLabel.node().getBBox().height + 10;
+				}
 			}
 
 			var trellisLabel;
@@ -1398,7 +1806,7 @@
 					return seriesScale(d.date);
 				})
 				.y(function (d) {
-					return yScale(d.Y_PREVALENCE_1000PP);
+					return yScale(d.Y_PREVALENCE_1000PP ? d.Y_PREVALENCE_1000PP : d.yPrevalence1000Pp);
 				})
 				.interpolate(options.interpolate);
 
@@ -1466,8 +1874,12 @@
 			gSeries.append("circle")
 				.attr("class", "g-value")
 				.attr("transform", function (d) {
-					var v = d.values;
-					return "translate(" + seriesScale(v[v.length - 1].date) + "," + yScale(v[v.length - 1].Y_PREVALENCE_1000PP) + ")";
+					if (v && v[v.length - 1] && v[v.length - 1].date && v[v.length - 1] && (v[v.length - 1].Y_PREVALENCE_1000PP || v[v.length - 1].yPrevalence1000Pp)) {
+						var v = d.values;
+						var yValue = v[v.length - 1].Y_PREVALENCE_1000PP ? v[v.length - 1].Y_PREVALENCE_1000PP : v[v.length - 1].yPrevalence1000Pp;
+						return "translate(" + seriesScale(v[v.length - 1].date) + "," + yScale(yValue) + ")";
+					}
+					return "translate(0,0)";
 				})
 				.attr("r", 2.5)
 				.style("display", "none");
@@ -1548,9 +1960,16 @@
 				gTrellis.selectAll(".g-label-value.g-start").call(valueLabel, date);
 				gTrellis.selectAll(".g-label-year.g-start").call(yearLabel, date);
 				gTrellis.selectAll(".g-value").attr("transform", function (d) {
-					var s = d.values,
-						v = s[bisect(s, date, 0, s.length - 1)]
-					return "translate(" + seriesScale(v.date) + "," + yScale(v.Y_PREVALENCE_1000PP) + ")";
+					var s = d.values;
+					if (s) {
+						var v = s[bisect(s, date, 0, s.length - 1)];
+						var yValue = v.Y_PREVALENCE_1000PP ? v.Y_PREVALENCE_1000PP : v.yPrevalence1000Pp;
+						if (v && v.date) {
+							return "translate(" + seriesScale(v.date) + "," + yScale(yValue) + ")";
+						} else {
+							return "translate(0,0);";
+						}
+					}
 				});
 			}
 
@@ -1566,36 +1985,42 @@
 				var offsetScale = d3.scale.linear().domain(seriesScale.range());
 
 				text.each(function (d) {
+
 					var text = d3.select(this),
 						s = d.values,
 						i = bisect(s, date, 0, s.length - 1),
 						j = Math.round(i / (s.length - 1) * (s.length - 12)),
-						v = s[i],
-						x = seriesScale(v.date);
+						v = s[i];
+					if (v && v.date) {
+						var x = seriesScale(v.date);
 
-					text.attr("dy", null).attr("y", -4);
-
-					text.text(options.yFormat(v.Y_PREVALENCE_1000PP))
-						.attr("transform", "translate(" + offsetScale.range([0, trellisScale.rangeBand() - this.getComputedTextLength()])(x) + "," + (yScale(d3.max(s.slice(j, j + 12), function (d) {
-							return d.Y_PREVALENCE_1000PP;
-						}))) + ")");
+						text.attr("dy", null).attr("y", -4);
+						var yValue = v.Y_PREVALENCE_1000PP ? v.Y_PREVALENCE_1000PP : v.yPrevalence1000Pp;
+						text.text(options.yFormat(yValue))
+							.attr("transform", "translate(" + offsetScale.range([0, trellisScale.rangeBand() - this.getComputedTextLength()])(x) + "," + (yScale(d3.max(s.slice(j, j + 12), function (d) {
+								return yValue;
+							}))) + ")");
+					}
 				});
 			}
 
 			function yearLabel(text, date) {
+
 				var offsetScale = d3.scale.linear().domain(seriesScale.range());
 				// derive the x vale by using the first trellis/series set of values.
 				// All series are assumed to contain the same domain of X values.
 				var s = dataByTrellis[0].values[0].values,
-					v = s[bisect(s, date, 0, s.length - 1)],
-					x = seriesScale(v.date);
+					v = s[bisect(s, date, 0, s.length - 1)];
+				if (v && v.date) {
+					var x = seriesScale(v.date);
 
-				text.each(function (d) {
-					d3.select(this)
-						.text(v.date.getFullYear())
-						.attr("transform", "translate(" + offsetScale.range([0, trellisScale.rangeBand() - this.getComputedTextLength()])(x) + "," + (height + 6) + ")")
-						.style("display", null);
-				});
+					text.each(function (d) {
+						d3.select(this)
+							.text(v.date.getFullYear())
+							.attr("transform", "translate(" + offsetScale.range([0, trellisScale.rangeBand() - this.getComputedTextLength()])(x) + "," + (height + 6) + ")")
+							.style("display", null);
+					});
+				}
 			}
 
 			function renderLegend(g) {
@@ -1647,6 +2072,7 @@
 			x = d3.scale.linear().range([0, width]);
 			y = d3.scale.linear().range([0, height]);
 
+
 			treemap = d3.layout.treemap()
 				.round(false)
 				.size([width, height])
@@ -1667,13 +2093,27 @@
 					return options.getsizevalue(d);
 				});
 
-			color_range = d3.extent(nodes, function (d) {
+			var extent = d3.extent(nodes, function (d) {
+				return options.getcolorvalue(d);
+			});
+			var median = d3.median(nodes, function (d) {
 				return options.getcolorvalue(d);
 			});
 
+			var colorRange;
+			if (options.getcolorrange) {
+				colorRange = options.getcolorrange();
+			} else {
+				colorRange = ["#E4FF7A", "#FC7F00"];
+			}
+
+			var colorScale = [extent[0], median, extent[1]];
+			if (options.getcolorscale) {
+				colorScale = options.getcolorscale();
+			}
 			var color = d3.scale.linear()
-				.domain([color_range[0], color_range[1]])
-				.range(["#E4FF7A", "#FC7F00"]);
+				.domain(colorScale)
+				.range(colorRange);
 
 			var cell = svg.selectAll("g")
 				.data(nodes)

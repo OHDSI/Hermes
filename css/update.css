@@ -21,12 +21,14 @@ body {
 
 .heading {
 	/* font-size: 1.1em; */
+
 	font-weight: bold;
 	margin-top: 5px;
 	margin-bottom: 0px;
 	/* clear:both; */
 	/* height:40px; */
 	/* background-color: #f00; */
+
 	padding: 3px 0px 0px 0px;
 }
 
@@ -78,6 +80,11 @@ body {
 	padding: 5px;
 }
 
+.statusIndicator {
+	text-align: center;
+	vertical-align: middle;
+}
+
 .configureRadio {
 	text-align: center;
 }
@@ -112,16 +119,12 @@ body {
 #wrapperSearch #querytext {
 	margin-top: 10px;
 	margin-bottom: 10px;
+	/* margin-left: 10px; */
+	padding-left: 10px;
 }
 
 #wrapperLeftMenu .badge {
 	margin-left: 20px;
-}
-
-.form-control:focus {
-	outline: 1px auto;
-	outline-offset: 0px;
-	border: solid 1px #ccc;
 }
 
 #wrapperConcept .nav.nav-pills {
@@ -193,6 +196,10 @@ pre span.key {
 	top: 0px;
 	right: 0px;
 	/* bottom: 10; */
+}
+
+#wrapperCohortDefinition {
+	padding: 5px;
 }
 
 #wrapperMainWindowContainer {
@@ -459,7 +466,7 @@ label {
 /* circle packing */
 
 text {
-	font-size: 11px;
+	font-size: 6px;
 	pointer-events: none;
 }
 
@@ -468,9 +475,9 @@ text.parent {
 }
 
 circle {
-	fill: #F19119;
-	stroke: #999;
-	pointer-events: all;
+	/* fill: #F19119; */
+	/* stroke: #999; */
+	/* pointer-events: all; */
 }
 
 circle.parent {
@@ -515,6 +522,10 @@ table.configureSourceTable {
 	width: 100%;
 }
 
+#wrapperJobs {
+	padding: 5px;
+}
+
 .configureSourceTable tbody tr:hover {
 	background-color: #eee;
 }
@@ -524,6 +535,10 @@ table.configureSourceTable {
 }
 
 th.centered {
+	text-align: center;
+}
+
+td.centered {
 	text-align: center;
 }
 
@@ -606,14 +621,166 @@ ul.ColVis_collection li {
 }
 
 .configureSourceTable i.fa {
-    line-height: 20px;
+	line-height: 20px;
 }
 
 .configureSourceTable i.fa.fa-exclamation-circle {
-    color: #800;
+	color: #800;
 }
 
 #wrapperSynonyms {
-    padding-left: 30px;
-    padding-bottom: 20px;
+	padding-left: 30px;
+	padding-bottom: 20px;
+}
+
+#wrapperCohort {
+	padding: 5px;
+}
+
+.wrapperTitle .fa {
+	font-size: 1.2em;
+}
+
+#wrapperCohortDefinition .fa-check-circle {
+	color: #080;
+}
+
+#wrapperCohortDefinition .fa-exclamation-circle {
+	color: #800;
+}
+
+#analysisStatus td {
+	line-height: 20px;
+	padding-left: 7px;
+	padding-right: 7px;
+	font-size: 11px;
+	border-bottom: 1px solid #ccc;
+}
+
+.rightaligned {
+	text-align: right;
+}
+
+.indicator {
+	text-align: center;
+	padding: 3px;
+	font-weight: normal;
+}
+
+#analysisStatus input[type="checkbox"] {
+	/* margin-top: 19px; */
+}
+
+#analysisStatus td div {
+	/* vertical-align: middle; */
+}
+
+#wrapperLeftMenu i.fa {
+	width: 24px;
+}
+
+#wrapperReportMenu {
+	margin: 5px;
+}
+
+#wrapperReportMenu select {
+	width: 200px;
+	float: right;
+	margin: 3px;
+}
+
+.pad-5 {
+	padding: 5px;
+}
+
+.form-control {
+	margin-bottom: 3px;
+	font-size: 12px;
+	background-color: #eee;
+	border: solid 1px #888;
+}
+
+.form-control:focus {
+	outline: 1px auto;
+	outline-offset: 0px;
+	border: solid 1px #ccc;
+}
+
+.form-control.invalid {
+	color:#c00;
+}
+
+.form-control option {
+	color: #000;
+}
+
+input.btn.btn-default {
+    font-size: 12px;
+    float: right;
+}
+
+.reportHeading {
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 10px;
+	margin-top: 0px;
+}
+
+.reportSectionHeading {
+	font-size: 13px;
+	font-weight: bold;
+	border-bottom: solid 1px #DDD;
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+.evidenceDescription {
+	color: #222;
+	font-size:11px;
+	padding: 10px;
+}
+
+.evidenceVisualization {
+	padding:10px;
+	text-align:center;
+}
+
+.pad-10 {
+    padding: 5px;
+}
+
+.report table {
+    width: 100%;
+    background-color: #eee;
+    margin-bottom: 15px;
+}
+
+.report svg {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+g.trellisLegend {
+}
+
+ul.nav.nav-tabs {
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+g rect {
+    cursor: pointer;
+}
+
+g rect:hover {
+    stroke-width: 2;
+    stroke: rgb(255, 255, 255);
+}
+
+.tab-content {
+    padding: 10px;
+}
+
+table#analysisStatus {
+    width: 100%;
 }

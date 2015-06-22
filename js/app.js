@@ -1,208 +1,13 @@
 var router;
 var pageModel;
 var initPromises = [];
+var datatables = {};
 
 $(document).ready(function () {
 	$.support.cors = true;
 	$('#querytext').focus();
 
-	pageModel = {
-		data: {
-			monthlyConditionPrevalence: ko.observable(),
-			monthlyConditionEraPrevalence: ko.observable()
-		},
-		recentSearch: ko.observableArray(null),
-		recentConcept: ko.observableArray(null),
-		currentSearch: ko.observable(),
-		currentView: ko.observable(),
-		conceptSetInclusionIdentifiers: ko.observableArray(),
-		currentConceptSetExpressionJson: ko.observable(),
-		currentConceptIdentifierList: ko.observable(),
-		currentIncludedConceptIdentifierList: ko.observable(),
-		searchResultsConcepts: ko.observableArray(),
-		relatedConcepts: ko.observableArray(),
-		importedConcepts: ko.observableArray(),
-		includedConcepts: ko.observableArray(),
-		loadingRelated: ko.observable(),
-		loadingEvidence: ko.observable(),
-		resolvingConceptSetExpression: ko.observable(),
-		evidence: ko.observableArray(),
-		services: ko.observableArray(configuredServices),
-		initializationErrors: 0,
-		vocabularyUrl: ko.observable(),
-		evidenceUrl: ko.observable(),
-		resultsUrl: ko.observable(),
-		currentConcept: ko.observable(),
-		currentConceptMode: ko.observable('details'),
-		currentConceptSetMode: ko.observable('details'),
-		currentImportMode: ko.observable('identifiers'),
-		feRelated: ko.observable(),
-		feSearch: ko.observable(),
-		metarchy: {},
-		prompts: ko.observableArray(), // todo: remove?
-		selectedConcepts: ko.observableArray(null),
-		selectedConceptsWarnings: ko.observableArray(),
-		checkCurrentSource: function (source) {
-			return source.url == pageModel.curentVocabularyUrl();
-		},
-		renderHierarchyLink: function (d) {
-			var valid = d.INVALID_REASON_CAPTION == 'Invalid' || d.STANDARD_CONCEPT != 'S' ? 'invalid' : '';
-			return '<a class="' + valid + '" href=\"#/concept/' + d.CONCEPT_ID + '\">' + d.CONCEPT_NAME + '</a>';
-		},
-		analyzeSelectedConcepts: function () {
-			pageModel.selectedConceptsWarnings.removeAll();
-			var domains = [];
-			var standards = [];
-			var includeNonStandard = false;
-
-			for (var i = 0; i < pageModel.selectedConcepts().length; i++) {
-				var domain = pageModel.selectedConcepts()[i].concept.DOMAIN_ID;
-				var standard = pageModel.selectedConcepts()[i].concept.STANDARD_CONCEPT_CAPTION;
-
-				if (standard != 'Standard') {
-					includeNonStandard = true;
-				}
-
-				var index;
-
-				index = $.inArray(domain, domains);
-				if (index < 0) {
-					domains.push(domain);
-				}
-
-				index = $.inArray(standard, standards);
-				if (index < 0) {
-					standards.push(standard);
-				}
-
-			}
-
-			if (domains.length > 1) {
-				pageModel.selectedConceptsWarnings.push('Your saved concepts come from multiple Domains (' + domains.join(', ') + ').  A useful set of concepts will typically all come from the same Domain.');
-			}
-
-			if (standards.length > 1) {
-				pageModel.selectedConceptsWarnings.push('Your saved concepts include different standard concept types (' + standards.join(', ') + ').  A useful set of concepts will typically all be of the same standard concept type.');
-			}
-
-			if (includeNonStandard) {
-				pageModel.selectedConceptsWarnings.push('Your saved concepts include Non-Standard or Classification concepts.  Typically concept sets should only include Standard concepts unless advanced use of this concept set is planned.');
-			}
-		},
-		selectedConceptsIndex: {},
-		activatePrompt: function (prompt) {
-			pageModel.feRelated().SetFilter(prompt.filters);
-			pageModel.relatedConcepts(pageModel.feRelated().GetCurrentObjects());
-			pageModel.feRelated(pageModel.feRelated());
-			var new_prompts = prompter.get_prompts(pageModel.currentConcept(), pageModel.feRelated());
-			pageModel.prompts(new_prompts);
-
-			$('#button_basic_filter').addClass('active');
-		},
-		clearPrompts: function () {
-			pageModel.feRelated().SetFilter([]);
-			pageModel.relatedConcepts(pageModel.feRelated().GetCurrentObjects());
-			pageModel.feRelated(pageModel.feRelated());
-			var new_prompts = prompter.get_prompts(pageModel.currentConcept(), pageModel.feRelated());
-			pageModel.prompts(new_prompts);
-
-			$('#button_basic_filter').removeClass('active');
-		},
-		createConceptSetItem: function (concept) {
-			var conceptSetItem = {};
-
-			conceptSetItem.concept = concept;
-			conceptSetItem.isExcluded = ko.observable(false);
-			conceptSetItem.includeDescendants = ko.observable(false);
-			conceptSetItem.includeMapped = ko.observable(false);
-			return conceptSetItem;
-		},
-		conceptSetInclusionCount: ko.observable(0),
-		resolveConceptSetExpression: function () {
-			pageModel.resolvingConceptSetExpression(true);
-			var conceptSetExpression = '{"items" :' + ko.toJSON(pageModel.selectedConcepts()) + '}';
-			var highlightedJson = pageModel.syntaxHighlight(conceptSetExpression);
-			pageModel.currentConceptSetExpressionJson(highlightedJson);
-
-			$.ajax({
-				url: pageModel.vocabularyUrl() + 'resolveConceptSetExpression',
-				data: conceptSetExpression,
-				method: 'POST',
-				contentType: 'application/json',
-				success: function (info) {
-					pageModel.conceptSetInclusionIdentifiers(info);
-					pageModel.currentIncludedConceptIdentifierList(info.join(','));
-					pageModel.conceptSetInclusionCount(info.length);
-					pageModel.resolvingConceptSetExpression(false);
-				},
-				error: function (err) {
-					alert(err);
-					pageModel.resolvingConceptSetExpression(false);
-				}
-			});
-
-		},
-		syntaxHighlight: function (json) {
-			if (typeof json != 'string') {
-				json = JSON.stringify(json, undefined, 2);
-			}
-			json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-			return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-				var cls = 'number';
-				if (/^"/.test(match)) {
-					if (/:$/.test(match)) {
-						cls = 'key';
-					} else {
-						cls = 'string';
-					}
-				} else if (/true|false/.test(match)) {
-					cls = 'boolean';
-				} else if (/null/.test(match)) {
-					cls = 'null';
-				}
-				return '<span class="' + cls + '">' + match + '</span>';
-			});
-		},
-		checkExecuteSearch: function (data, e) {
-			if (e.keyCode == 13) { // enter
-				var query = $('#querytext').val();
-				if (query.length > 2) {
-					document.location = "#/search/" + encodeURI(query);
-				} else {
-					$('#helpMinimumQueryLength').modal('show')
-				}
-			}
-		},
-		updateSearchFilters: function () {
-			$(event.target).toggleClass('selected');
-
-			var filters = [];
-			$('#wrapperSearchResultsFilter .facetMemberName.selected').each(function (i, d) {
-				filters.push(d.id);
-			});
-			pageModel.feSearch().SetFilter(filters);
-			// update filter data binding
-			pageModel.feSearch(pageModel.feSearch());
-			// update table data binding
-			pageModel.searchResultsConcepts(pageModel.feSearch().GetCurrentObjects());
-		},
-		updateRelatedFilters: function () {
-			$(event.target).toggleClass('selected');
-
-			var filters = [];
-			$('#wrapperRelatedConceptsFilter .facetMemberName.selected').each(function (i, d) {
-				filters.push(d.id);
-			});
-			pageModel.feRelated().SetFilter(filters);
-			// update filter data binding
-			pageModel.feRelated(pageModel.feRelated());
-			// update table data binding
-			pageModel.relatedConcepts(pageModel.feRelated().GetCurrentObjects());
-		},
-		selectConcept: function (concept) {
-			document.location = '#/concept/' + concept.CONCEPT_ID;
-		}
-	};
+	pageModel = new ViewModel();
 
 	pageModel.currentConceptMode.subscribe(function (newMode) {
 		switch (newMode) {
@@ -216,6 +21,49 @@ $(document).ready(function () {
 				success: function (evidence) {
 					pageModel.evidence(evidence);
 					pageModel.loadingEvidence(false);
+
+					var evidenceData = [];
+					var evidenceSource = {
+						name: 'source',
+						values: []
+					};
+					evidenceData.push(evidenceSource);
+					var evidenceCount = 0;
+					for (var i = 0; i < evidence.length; i++) {
+						if (evidence[i].evidenceType == 'MEDLINE_MeSH_CR') {
+							var e = {
+								evidenceType: evidence[i].evidenceType,
+								label: evidence[i].drugName,
+								xValue: evidenceCount++,
+								yValue: evidence[i].value
+							};
+							evidenceSource.values.push(e);
+						}
+					}
+
+					var scatter = new jnj_chart.scatterplot();
+					scatter.render(evidenceData, "#conceptEvidenceScatter", 460, 150, {
+						yFormat: d3.format('0'),
+						xValue: "xValue",
+						yValue: "yValue",
+						xLabel: "Drugs",
+						yLabel: "Raw Value",
+						seriesName: "evidenceType",
+						showLegend: false,
+						tooltips: [{
+							label: 'Drug',
+							accessor: function (o) {
+								return o.label;
+							}
+						}, {
+							label: 'Raw Value',
+							accessor: function (o) {
+								return o.yValue;
+							}
+						}],
+						colors: d3.scale.category10(),
+						showXAxis: false
+					});
 				},
 				error: function () {
 					pageModel.loadingEvidence(false);
@@ -236,6 +84,26 @@ $(document).ready(function () {
 			}
 			pageModel.currentConceptIdentifierList(identifiers.join(','));
 
+			break;
+		case 'reports':
+			$.ajax({
+				url: pageModel.services()[0].url + 'cohortdefinition',
+				method: 'GET',
+				contentType: 'application/json',
+				success: function (cohortDefinitions) {
+					pageModel.cohortDefinitions(cohortDefinitions);
+				}
+			});
+			break;
+		case 'cohortdefinitions':
+			$.ajax({
+				url: pageModel.services()[0].url + 'cohortdefinition',
+				method: 'GET',
+				contentType: 'application/json',
+				success: function (cohortDefinitions) {
+					pageModel.cohortDefinitions(cohortDefinitions);
+				}
+			});
 			break;
 		}
 	});
@@ -307,6 +175,20 @@ $(document).ready(function () {
 
 	var routes = {
 		'/concept/:conceptId:': loadConcept,
+		'/cohortdefinitions': function () {
+			pageModel.currentView('cohortdefinitions');
+		},
+		'/configure': function () {
+			pageModel.currentView('configure');
+		},
+		'/jobs': function () {
+			pageModel.currentView('loading');
+			pageModel.loadJobs();
+		},
+		'reports': function () {
+			pageModel.currentView('reports');
+		},
+		'/cohortdefinition/:cohortDefinitionId:': loadCohortDefinition,
 		'/search/:query:': search
 	}
 
@@ -430,6 +312,10 @@ function initComplete() {
 
 function routeNotFound(d) {
 	// for debug use
+}
+
+function renderCohortDefinitionLink(s, p, d) {
+	return '<a href=\"#/cohortdefinition/' + d.id + '\">' + d.name + '</a>';
 }
 
 function renderLink(s, p, d) {
@@ -684,7 +570,7 @@ function selectAllRelated() {
 		'search': 'applied'
 	}).nodes());
 
-	for (var i=0; i<nodes.length; i++) {
+	for (var i = 0; i < nodes.length; i++) {
 		var concept = ko.contextFor(nodes[i]).$data;
 		if (pageModel.selectedConceptsIndex[concept.CONCEPT_ID] == undefined) {
 			var conceptSetItem = pageModel.createConceptSetItem(concept);
@@ -742,6 +628,136 @@ function hasRelationship(concept, relationships) {
 		}
 	}
 	return false;
+}
+
+function loadCohortDefinition(cohortDefinitionId) {
+	pageModel.currentView('loading');
+
+	var definitionPromise = $.ajax({
+		url: pageModel.services()[0].url + 'cohortdefinition/' + cohortDefinitionId,
+		method: 'GET',
+		contentType: 'application/json',
+		success: function (cohortDefinition) {
+			pageModel.currentCohortDefinition(cohortDefinition);
+		}
+	});
+
+	var infoPromise = $.ajax({
+		url: pageModel.services()[0].url + 'cohortdefinition/' + cohortDefinitionId + '/info',
+		method: 'GET',
+		contentType: 'application/json',
+		success: function (generationInfo) {
+			pageModel.currentCohortDefinitionInfo(generationInfo);
+		}
+	});
+
+	$.when(infoPromise, definitionPromise).done(function (ip, dp) {
+		// now that we have required information lets compile them into data objects for our view
+		var cdmSources = pageModel.services()[0].sources.filter(hasCDM);
+		var results = [];
+
+		for (var s = 0; s < cdmSources.length; s++) {
+			var source = cdmSources[s];
+
+			pageModel.sourceAnalysesStatus[source.sourceKey] = ko.observable({
+				ready: false,
+				checking: false
+			});
+
+			var sourceInfo = getSourceInfo(source);
+			var cdsi = {};
+			cdsi.name = cdmSources[s].sourceName;
+
+			if (sourceInfo != null) {
+				cdsi.isValid = sourceInfo.isValid;
+				cdsi.status = sourceInfo.status;
+				var date = new Date(sourceInfo.startTime);
+				cdsi.startTime = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+				cdsi.executionDuration = (sourceInfo.executionDuration / 1000) + 's'
+				cdsi.distinctPeople = asyncComputed(getCohortCount, this, source);
+			} else {
+				cdsi.isValid = false;
+				cdsi.status = 'n/a';
+				cdsi.startTime = 'n/a';
+				cdsi.executionDuration = 'n/a';
+				cdsi.distinctPeople = 'n/a';
+			}
+
+			results.push(cdsi);
+		}
+
+		pageModel.cohortDefinitionSourceInfo(results);
+
+		// load universe of analyses
+		var analysesPromise = $.ajax({
+			url: pageModel.services()[0].url + 'cohortanalysis/',
+			method: 'GET',
+			contentType: 'application/json',
+			success: function (analyses) {
+				var index = {};
+				var nestedAnalyses = [];
+
+				for (var a = 0; a < analyses.length; a++) {
+					var analysis = analyses[a];
+
+					if (index[analysis.analysisType] == undefined) {
+						var analysisType = {
+							name: analysis.analysisType,
+							analyses: []
+						};
+						nestedAnalyses.push(analysisType);
+						index[analysis.analysisType] = nestedAnalyses.indexOf(analysisType);
+					}
+					pageModel.analysisLookup[analysis.analysisId] = analysis.analysisType;
+					nestedAnalyses[index[analysis.analysisType]].analyses.push(analysis);
+				}
+
+				pageModel.cohortAnalyses(nestedAnalyses);
+
+				// obtain completed result status for each source
+				for (var s = 0; s < cdmSources.length; s++) {
+					var source = cdmSources[s];
+					var info = getSourceInfo(source);
+					if (info) {
+						var sourceAnalysesStatus = {};
+						sourceAnalysesStatus.checking = true;
+						pageModel.sourceAnalysesStatus[source.sourceKey](sourceAnalysesStatus);
+						getCompletedAnalyses(source);
+					}
+				}
+			}
+		});
+
+		pageModel.currentView('cohortdefinition');
+	});
+
+}
+
+function hasCDM(source) {
+	for (var d = 0; d < source.daimons.length; d++) {
+		if (source.daimons[d].daimonType == 'CDM') {
+			return true;
+		}
+	}
+	return false;
+}
+
+function hasResults(source) {
+	for (var d = 0; d < source.daimons.length; d++) {
+		if (source.daimons[d].daimonType == 'Results') {
+			return true;
+		}
+	}
+	return false;
+}
+
+function getSourceInfo(source) {
+	var info = pageModel.currentCohortDefinitionInfo();
+	for (var i = 0; i < info.length; i++) {
+		if (info[i].id.sourceId == source.sourceId) {
+			return info[i];
+		}
+	}
 }
 
 function loadConcept(conceptId) {
@@ -877,5 +893,101 @@ function exportConceptIdentifiers() {
 	var includedConcepts = [];
 	for (var i = 0; i < pageModel.includedConcepts().length; i++) {
 		includedConcepts.push(pageModel.includedConcepts()[i].CONCEPT_ID);
+	}
+}
+
+function getCohortCount(source) {
+	var sourceKey = source.sourceKey;
+	var cohortDefinitionId = pageModel.currentCohortDefinition().id;
+	return $.ajax(pageModel.services()[0].url + sourceKey + '/cohortresults/' + cohortDefinitionId + '/distinctPersonCount', {});
+}
+
+function getCompletedAnalyses(source) {
+	var cohortDefinitionId = pageModel.currentCohortDefinition().id;
+
+	$.ajax(pageModel.services()[0].url + source.sourceKey + '/cohortresults/' + cohortDefinitionId + '/analyses', {
+		success: function (analyses) {
+			sourceAnalysesStatus = {};
+
+			// initialize cohort analyses status
+			for (var i = 0; i < pageModel.cohortAnalyses().length; i++) {
+				sourceAnalysesStatus[pageModel.cohortAnalyses()[i].name] = 0;
+			}
+
+			// capture statistics on the number of each analysis type that was completed
+			for (var a = 0; a < analyses.length; a++) {
+				var analysisType = pageModel.analysisLookup[analyses[a]];
+				sourceAnalysesStatus[analysisType] = sourceAnalysesStatus[analysisType] + 1;
+			}
+			sourceAnalysesStatus.ready = true;
+			pageModel.sourceAnalysesStatus[source.sourceKey](sourceAnalysesStatus);
+		}
+	});
+}
+
+function asyncComputed(evaluator, owner, args) {
+	var result = ko.observable('<i class="fa fa-refresh fa-spin"></i>');
+
+	ko.computed(function () {
+		evaluator.call(owner, args).done(result);
+	});
+
+	return result;
+}
+
+function generateAnalyses(data, event) {
+	console.log(event.target);
+	$(event.target).prop("disabled", true);
+
+	var requestedAnalysisTypes = [];
+	$('input[type="checkbox"][name="' + data.sourceKey + '"]:checked').each(function () {
+		requestedAnalysisTypes.push($(this).val());
+	});
+	var analysisIdentifiers = [];
+
+	var analysesTypes = pageModel.cohortAnalyses();
+	for (var i = 0; i < analysesTypes.length; i++) {
+		if (requestedAnalysisTypes.indexOf(analysesTypes[i].name) >= 0) {
+			for (var j = 0; j < analysesTypes[i].analyses.length; j++) {
+				analysisIdentifiers.push(analysesTypes[i].analyses[j].analysisId);
+			}
+		}
+	}
+
+	if (analysisIdentifiers.length > 0) {
+		$(event.target).prop('value', 'Starting job...');
+		var cohortDefinitionId = pageModel.currentCohortDefinition().id;
+		var cohortJob = {};
+
+		cohortJob.jobName = 'HERACLES' + '_COHORT_' + cohortDefinitionId + '_' + data.sourceKey;
+		cohortJob.sourceKey = data.sourceKey;
+		cohortJob.smallCellCount = 5;
+		cohortJob.cohortDefinitionIds = [];
+		cohortJob.cohortDefinitionIds.push(cohortDefinitionId);
+		cohortJob.analysisIds = analysisIdentifiers;
+		cohortJob.runHeraclesHeel = false;
+		cohortJob.cohortPeriodOnly = false;
+
+		// set concepts
+		cohortJob.conditionConceptIds = [];
+		cohortJob.drugConceptIds = [];
+		cohortJob.procedureConceptIds = [];
+		cohortJob.observationConceptIds = [];
+		cohortJob.measurementConceptIds = [];
+
+		console.log("Submitting to cohort analysis service:");
+		console.log(cohortJob);
+
+		$.ajax({
+			url: pageModel.services()[0].url + 'cohortanalysis',
+			data: JSON.stringify(cohortJob),
+			method: 'POST',
+			contentType: 'application/json',
+			success: function (info) {
+				console.log(info);
+			}
+		});
+	} else {
+		$(event.target).prop("disabled", false);
 	}
 }

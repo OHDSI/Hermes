@@ -18,6 +18,8 @@
 	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
 	<script type="text/javascript" src="js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/knockout-3.1.0.js"></script>
+	<script type="text/javascript" src="js/model.js"></script>
+	<script type="text/javascript" src="js/lodash.min.js"></script>
 	<script type="text/javascript" src="js/knockout.dataTables.binding.js"></script>
 	<script type="text/javascript" src="js/knockout.lineChart.binding.js"></script>
 	<script type="text/javascript" src="js/knockout.mapping.min.js"></script>
@@ -33,6 +35,8 @@
 	<script type="text/javascript" src="js/config.js"></script>
 	<script type="text/javascript" src="js/visualization.packinghiearchy.js"></script>
 	<script type="text/javascript" src="js/app.js"></script>
+	<script type="text/javascript" src="js/reporting.js"></script>
+	<script type="text/javascript" src="js/colorbrewer.js"></script>
 </head>
 
 <body>
@@ -40,7 +44,7 @@
 		<div id="wrapperLogo"><img src="images/ohdsi.png">Hermes</div>
 		<ul>
 			<li data-bind="click: function() {currentView('search'); document.location='#';}">
-				<a href="#"><i class="fa fa-search"></i> Search</a>
+				<a href="#"><i class="fa fa-search"></i>Vocabulary Search</a>
 			</li>
 			<ul data-bind="foreach:recentSearch">
 				<li>
@@ -48,7 +52,7 @@
 				</li>
 			</ul>
 			<li>
-				<a href="#"><i class="fa fa-history"></i> Recent Concepts</a>
+				<a href="#"><i class="fa fa-history"></i>Recent Concepts</a>
 			</li>
 			<ul data-bind="foreach:recentConcept">
 				<li>
@@ -56,16 +60,25 @@
 				</li>
 			</ul>
 			<li data-bind="click: function() {currentView('conceptset'); document.location='#';}">
-				<a href="#"><i class="fa fa-shopping-cart"></i> Concept Set</a>
+				<a href="#"><i class="fa fa-shopping-cart"></i>Concept Set</a>
 				<span data-bind="if: pageModel.selectedConcepts().length > 0">
 					<span class="badge" data-bind="text:pageModel.selectedConcepts().length"></span>
 				</span>
 			</li>
-			<li data-bind="click: function() { currentView('import'); document.location='#' }">
-				<a href="#"><i class="fa fa-upload"></i> Import</a>
+			<li>
+				<a href="#/cohortdefinitions"><i class="fa fa-language"></i>Cohort Definitions</a>
 			</li>
-			<li data-bind="click: function() { currentView('configure'); document.location='#' }">
-				<a href="#"><i class="fa fa-cog"></i> Configure</a>
+			<li>
+				<a href="#/reports"><i class="fa fa-area-chart"></i>Cohort Reporting</a>
+			</li>
+			<li data-bind="click: function() { currentView('import'); document.location='#' }">
+				<a href="#"><i class="fa fa-upload"></i>Import</a>
+			</li>
+			<li>
+				<a href="#/jobs"><i class="fa fa-tasks"></i>Jobs</a>
+			</li>
+			<li>
+				<a href="#/configure"><i class="fa fa-cogs"></i>Configure</a>
 			</li>
 		</ul>
 	</div>
@@ -81,6 +94,363 @@
 			<div id="wrapperLoading" data-bind="if: currentView() == 'loading'">
 				<div class="wrapperTitle">
 					<i class="fa fa-refresh fa-spin"></i> Loading...
+				</div>
+			</div>
+
+			<div data-bind="if: currentView() == 'jobs'">
+				<div class="wrapperTitle">
+					Jobs
+				</div>
+				<div id="wrapperJobs">
+					<table width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+            data: pageModel.jobs(),
+            options: {
+						dom: 'Clfiprt',
+						language: {
+							search : 'Filter Jobs:'
+						},
+						colVis: {
+							buttonText: 'Change Columns',
+							align: 'right',
+							overlayFade: 0,
+							showAll: 'Show All Columns',
+							restore: 'Reset Columns'
+						},
+						lengthMenu: [[25, 50, 100, -1], [25, 50, 100,'All']],
+						orderClasses: false,
+						deferRender: true,
+						autoWidth: false,
+						ordering: true,
+						order: [[ 2, 'desc' ]],
+						columns: [
+								{ title: 'Job Name', data: 'jobParameters.jobName' },
+								{ title: 'status', data: 'status'},
+								{ title: 'Start Date', data: 'startDate'},
+								{ title: 'End Date', data: 'endDate'}
+						]
+				}
+        }">
+					</table>
+				</div>
+			</div>
+
+			<div data-bind="if: currentView() == 'reports'">
+				<div class="wrapperTitle">
+					<span data-bind="if:!pageModel.loadingReport()"><i class="fa fa-area-chart"></i></span>
+					<span data-bind="if:pageModel.loadingReport()"><i class="fa fa-refresh fa-spin"></i></span> Cohort Reporting
+				</div>
+
+				<div class="pad-5">
+					<select class="form-control" data-bind="css : { invalid: reportCohortDefinitionId()==undefined }, options:pageModel.cohortDefinitions, optionsText:'name', optionsValue:'id', optionsCaption:'Select a Cohort Definition', value:reportCohortDefinitionId"></select>
+					<select class="form-control" data-bind="css : { invalid: reportReportName()==undefined }, options:pageModel.reports(), optionsCaption:'Select a Report', value:reportReportName"></select>
+					<select class="form-control" data-bind="css : { invalid: reportSourceKey()==undefined }, options:pageModel.services()[0].sources.filter(hasResults), optionsValue:'sourceKey', optionsText:'sourceName', value:reportSourceKey, optionsCaption:'Select a Source'"></select>
+					<input type="button" class="btn btn-default" onclick="runReport();" data-bind="enable: pageModel.reportValid(), value: pageModel.loadingReport() ? 'Loading...' : 'Run Report'">
+				</div>
+
+				<div id="reportPerson" class="pad-10 report" data-bind="if: currentReport() == 'Person' && !loadingReport()">
+					<div class="reportHeading"><i class="fa fa-area-chart"></i> Person Report</div>
+					<div class="reportSectionHeading">Year of Birth</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:30%;">The number of people in this cohort shown with respect to their year of birth.</td>
+							<td class="evidenceVisualization" id="hist"></td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Gender</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:50%;">The number of people in this cohort stratified by gender.</td>
+							<td class="evidenceVisualization" id="gender"></td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Race</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:50%;">The number of people in this cohort stratified by race.</td>
+							<td class="evidenceVisualization" id="race"></td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Ethnicity</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:50%;">The number of people in this cohort stratified by ethnicity.</td>
+							<td class="evidenceVisualization" id="ethnicity"></td>
+						</tr>
+					</table>
+				</div>
+
+				<div id="reportCohortSpecific" class="pad-10 report" data-bind="if: currentReport() == 'Cohort Specific' && !loadingReport()">
+					<div class="reportHeading"><i class="fa fa-area-chart"></i> Cohort Specific Report</div>
+					<div class="reportSectionHeading">Prevalence by Month</div>
+					<table>
+						<tr>
+							<td class="evidenceVisualization" id="prevalenceByMonth"></td>
+						</tr>
+						<tr>
+							<td class="evidenceDescription">help text here</td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Cohort Start</div>
+					<table>
+						<tr>
+							<td class="evidenceVisualization" id="trellisLinePlot"></td>
+						</tr>
+						<tr>
+							<td class="evidenceDescription">help text here</td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Persons in Cohort from Start to End</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:30%;">help text here</td>
+							<td class="evidenceVisualization" id="personinCohortFromStartToEnd"></td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Number of Persons by Duration from Cohort Start to Cohort End</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:30%;">help text here</td>
+							<td class="evidenceVisualization" id="personsByDurationFromStartToEnd"></td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Distribution of Age at Cohort Start by Cohort Start Year</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:30%;">help text here</td>
+							<td class="evidenceVisualization" id="distributionAgeCohortStartByCohortStartYear"></td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Age at Index</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:30%;">help text here</td>
+							<td class="evidenceVisualization" id="ageAtIndex"></td>
+						</tr>
+					</table>
+					<div class="reportSectionHeading">Distribution of Age at Cohort Start by Gender</div>
+					<table>
+						<tr>
+							<td class="evidenceDescription" style="width:30%;">help text here</td>
+							<td class="evidenceVisualization" id="distributionAgeCohortStartByGender"></td>
+						</tr>
+					</table>
+				</div>
+
+				<div id="reportConditionsByIndex" class="pad-10 report" data-bind="if: currentReport() == 'Conditions by Index' && !loadingReport()">
+					<div class="reportHeading"><i class="fa fa-area-chart"></i> Conditions by Index Report</div>
+					<div class="reportSectionHeading">Condition Prevalence</div>
+
+					<ul class="nav nav-tabs" id="myTab" role="tablist">
+						<li class="active" id="treemap-tab"><a href="#condition-treemap-panel" role="tab" data-toggle="tab">Treemap</a>
+						</li>
+						<li><a href="#condition-table-panel" role="tab" data-toggle="tab">Table</a>
+						</li>
+					</ul>
+					<div id='content' class="tab-content">
+						<div role="tabpanel" class="tab-pane active" id="condition-treemap-panel">
+							<div id="treemap_container">
+								<div class="treemap_zoomtarget"></div>
+							</div>
+							<div class="treemap_legend">Box Size: Prevalence, Color: Log of Relative Risk (Red to Green = Negative to Positive), Use Ctrl-Click to Zoom, Alt-Click to Reset Zoom</div>
+						</div>
+						<div role="tabpanel" class="tab-pane" id="condition-table-panel">
+							<table id="condition_table" class="display treemap_table" type="condition">
+								<thead>
+									<tr>
+										<th>Concept Id</th>
+										<th>SOC</th>
+										<th>HLGT</th>
+										<th>HLT</th>
+										<th>PT</th>
+										<th>SNOMED</th>
+										<th>Person Count</th>
+										<th>Prevalence</th>
+										<th>Relative Risk per Person</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+
+					<div data-bind="if:pageModel.loadingReportDrilldown">
+						<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
+					</div>
+					<div data-bind="if:pageModel.activeReportDrilldown">
+						<div id="conditionDrilldownScatterplotHeading" class="reportSectionHeading">
+						</div>
+						<div id="conditionDrilldownScatterplot"></div>
+					</div>
+				</div>
+
+				<div id="reportDrugErasByIndex" class="pad-10 report" data-bind="if: currentReport() == 'Drugs by Index' && !loadingReport()">
+					<div class="reportHeading"><i class="fa fa-area-chart"></i> Drugs by Index Report</div>
+					<div class="reportSectionHeading">Drug Era Prevalence</div>
+
+					<ul class="nav nav-tabs" id="myTab" role="tablist">
+						<li class="active" id="treemap-tab"><a href="#drugera-treemap-panel" role="tab" data-toggle="tab">Treemap</a>
+						</li>
+						<li><a href="#drugera-table-panel" role="tab" data-toggle="tab">Table</a>
+						</li>
+					</ul>
+					<div id='content' class="tab-content">
+						<div role="tabpanel" class="tab-pane active" id="drugera-treemap-panel">
+							<div id="treemap_container">
+								<div class="treemap_zoomtarget"></div>
+							</div>
+							<div class="treemap_legend">Box Size: Prevalence, Color: Log of Relative Risk (Red to Green = Negative to Positive), Use Ctrl-Click to Zoom, Alt-Click to Reset Zoom</div>
+						</div>
+						<div role="tabpanel" class="tab-pane" id="drugera-table-panel">
+							<table id="drugera_table" class="display treemap_table" type="drug">
+								<thead>
+									<tr>
+										<th>Concept Id</th>
+										<th>ATC 1</th>
+										<th>ATC 3</th>
+										<th>ATC 5</th>
+										<th>Ingredient</th>
+										<th>Person Count</th>
+										<th>Prevalence</th>
+										<th>Relative Risk per Person</th>
+									</tr>
+								</thead>
+							</table>
+						</div>
+					</div>
+
+					<div data-bind="if:pageModel.loadingReportDrilldown">
+						<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
+					</div>
+					<div data-bind="if:pageModel.activeReportDrilldown">
+						<div id="drugDrilldownScatterplotHeading" class="reportSectionHeading">
+						</div>
+						<div id="drugDrilldownScatterplot"></div>
+					</div>
+				</div>
+			</div>
+
+			<div data-bind="if: currentView() == 'cohortdefinition'">
+				<div class="wrapperTitle" data-bind="text:currentCohortDefinition().name">
+				</div>
+
+				<div id="wrapperCohortDefinition">
+					<div class="heading">Cohort Definition</div>
+					<div class="cohortDescription" data-bind="text:currentCohortDefinition().description"></div>
+
+					<div class="heading">Cohort Generation Status</div>
+					<table class="configureSourceTable">
+						<thead>
+							<th>Source Name</th>
+							<th class="centered">Generated</th>
+							<th>Generation Status</th>
+							<th>Distinct People</th>
+							<th>Generated</th>
+							<th>Generation Duration</th>
+						</thead>
+						<tbody data-bind="foreach:cohortDefinitionSourceInfo">
+							<tr>
+								<td data-bind="text:name"></td>
+								<td class="statusIndicator">
+									<div class="fa" data-bind="css: { 'fa-check-circle' : isValid, 'fa-exclamation-circle' : !isValid }"></div>
+								</td>
+								<td class="rightaligned">
+									<div data-bind="text: status"></div>
+								</td>
+								<td class="rightaligned">
+									<div><span data-bind="html: distinctPeople"></span>
+									</div>
+								</td>
+								<td class="rightaligned">
+									<div data-bind="text: startTime"></div>
+								</td>
+								<td class="rightaligned">
+									<div data-bind="text: executionDuration"></div>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+
+					<div class="heading">Cohort Analysis Status</div>
+
+					<table id="analysisStatus">
+						<thead>
+							<th>Analysis Type</th>
+							<!-- ko foreach: pageModel.services()[0].sources.filter(hasCDM) -->
+							<th data-bind="text:sourceName"></th>
+							<!-- /ko -->
+						</thead>
+						<tbody>
+							<!-- ko foreach:cohortAnalyses -->
+							<tr>
+								<td data-bind="text:name"></td>
+								<!-- ko foreach: pageModel.services()[0].sources.filter(hasCDM) -->
+								<td class="statusIndicator">
+									<!-- ko if:pageModel.sourceAnalysesStatus[sourceKey]().ready -->
+									<i class="fa" data-bind="css: { 'fa-check-circle' : pageModel.sourceAnalysesStatus[sourceKey]()[$parent.name] > 0, 'fa-exclamation-triangle' : pageModel.sourceAnalysesStatus[sourceKey]()[$parent.name] == 0 }"></i>
+									<input data-bind="attr: { name : sourceKey, value : $parent.name }" type="checkbox">
+									<!-- /ko -->
+									<!-- ko if:pageModel.sourceAnalysesStatus[sourceKey]().checking -->
+									<i class="fa fa-refresh fa-spin"></i>
+									<!-- /ko -->
+									<!-- ko if:!pageModel.sourceAnalysesStatus[sourceKey]().checking && !pageModel.sourceAnalysesStatus[sourceKey]().ready -->
+									<i class="fa fa-exclamation-circle"></i>
+									<!-- /ko -->
+								</td>
+								<!-- /ko -->
+							</tr>
+							<!-- /ko -->
+							<tr>
+								<td style="border-bottom:0px;"></td>
+								<!-- ko foreach: pageModel.services()[0].sources.filter(hasCDM) -->
+								<td style="border-bottom:0px;padding:5px;" class="statusIndicator">
+									<!-- ko if:pageModel.sourceAnalysesStatus[sourceKey]().ready -->
+									<input data-bind="click:generateAnalyses" type="button" value="Generate">
+									<!-- /ko -->
+								</td>
+								<!-- /ko -->
+							</tr>
+						</tbody>
+					</table>
+
+				</div>
+			</div>
+
+			<div data-bind="if: currentView() == 'cohortdefinitions'">
+				<div class="wrapperTitle">
+					<i class="fa fa-language"></i> Cohort Definitions
+				</div>
+
+				<div id="wrapperCohort">
+					<table width="100%" class="conceptTable stripe compact hover" cellspacing="0" data-bind="dataTable:{
+            data: pageModel.cohortDefinitions(),
+            options: {
+						dom: 'Clfiprt',
+						language: {
+							search : 'Filter Cohort Definitions:'
+						},
+						colVis: {
+							buttonText: 'Change Columns',
+							align: 'right',
+							overlayFade: 0,
+							showAll: 'Show All Columns',
+							restore: 'Reset Columns'
+						},
+						lengthMenu: [[25, 50, 100, -1], [25, 50, 100,'All']],
+						orderClasses: false,
+						deferRender: true,
+						autoWidth: false,
+						ordering: true,
+						order: [[ 2, 'asc' ]],
+						columns: [
+								{ title: 'Id', data: 'id' },
+								{ title: 'Name', render: renderCohortDefinitionLink },
+								{ title: 'Description', data: 'description'},
+								{ title: 'Expression Type', data: 'expressionType', visible: false },
+								{ title: 'Created', data: 'createdDate'},
+								{ title: 'Last Modified', data: 'modifiedDate', visible: false}
+						]
+				}
+        }">
+					</table>
 				</div>
 			</div>
 
@@ -543,6 +913,13 @@
 				</div>
 
 				<div id="wrapperConceptEvidence" data-bind="if:pageModel.currentConceptMode() == 'evidence' && !pageModel.loadingEvidence()">
+
+					<div class="heading">Evidence Scatter</div>
+					<div style="background-color:#eee;padding:5px;">
+						<div id="conceptEvidenceScatter"></div>
+					</div>
+
+					<div class="heading">Evidence Records</div>
 					<table width="100%" class="stripe compact hover" cellspacing="0" data-bind="dataTable:{
             data: pageModel.evidence(),
             options: {
@@ -570,6 +947,7 @@
 					}
         }">
 					</table>
+
 				</div>
 
 				<div id="wrapperConceptDetails" data-bind="if:pageModel.currentConceptMode() == 'details'">
@@ -686,8 +1064,9 @@
 				</div>
 
 			</div>
+
 			<div id="wrapperSearch" data-bind="if: currentView() == 'search'">
-				<div class="wrapperTitle">Search</div>
+				<div class="wrapperTitle"><i class="fa fa-search"></i> Vocabulary Search</div>
 				<div class="paddedWrapper">
 					<input id="querytext" placeholder="type your search here" class="form-control" type="text" data-bind="event: { keyup: checkExecuteSearch}" />
 
@@ -716,6 +1095,7 @@
 
 				</div>
 			</div>
+
 			<div id="wrapperSearchResults" data-bind="if: currentView() == 'searchResults'">
 				<div>
 					<div class="wrapperTitle" data-bind="text: 'Search Results for ' + decodeURI(pageModel.currentSearch())"></div>
