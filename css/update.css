@@ -1,5 +1,5 @@
 body {
-	font-family: Verdana;
+	font-family: 'Arial';
 	font-size: 12px;
 	margin: 0px;
 	padding: 0px;
@@ -20,9 +20,9 @@ body {
 }
 
 .heading {
-	/* font-size: 1.1em; */
+	font-size: 14px;
 
-	font-weight: bold;
+	/* font-weight: bold; */
 	margin-top: 5px;
 	margin-bottom: 0px;
 	/* clear:both; */
@@ -214,7 +214,7 @@ div#wrapperMainWindowContainer {}
 	background-color: #222;
 	height: 50px;
 	color: #FFFFFF;
-	line-height: 50px;
+	line-height: 60px;
 	padding: 0px 10px 0px 10px;
 	font-size: 14px;
 	border-bottom: solid 1px #ccc;
@@ -638,7 +638,8 @@ ul.ColVis_collection li {
 }
 
 .wrapperTitle .fa {
-	font-size: 1.2em;
+	font-size: 2.0em;
+	padding-right: 5px;
 }
 
 #wrapperCohortDefinition .fa-check-circle {
@@ -696,8 +697,10 @@ ul.ColVis_collection li {
 .form-control {
 	margin-bottom: 3px;
 	font-size: 12px;
-	background-color: #eee;
-	border: solid 1px #888;
+	background-color: #FFF;
+	border: solid 1px #ccc;
+	height: 24px;
+	color: #000;
 }
 
 .form-control:focus {
@@ -707,7 +710,7 @@ ul.ColVis_collection li {
 }
 
 .form-control.invalid {
-	color:#c00;
+	color: #20425A;
 }
 
 .form-control option {
@@ -717,21 +720,27 @@ ul.ColVis_collection li {
 input.btn.btn-default {
     font-size: 12px;
     float: right;
+    background-image: none;
+    background-color: #24465D;
+    color: #FFF;
+    text-shadow: none;
 }
 
 .reportHeading {
 	font-size: 14px;
-	font-weight: bold;
-	margin-bottom: 10px;
+	margin-bottom: 25px;
 	margin-top: 0px;
+	/* padding: 5px; */
+	/* border-bottom: solid 2px #333; */
 }
 
 .reportSectionHeading {
 	font-size: 13px;
-	font-weight: bold;
-	border-bottom: solid 1px #DDD;
+	/* font-weight: bold; */
+	border-bottom: solid 1px #ccc;
 	margin-top: 10px;
-	margin-bottom: 5px;
+	margin-bottom: 0px;
+	color: #222;
 }
 
 .evidenceDescription {
@@ -746,12 +755,12 @@ input.btn.btn-default {
 }
 
 .pad-10 {
-    padding: 5px;
+    padding: 10px;
 }
 
 .report table {
     width: 100%;
-    background-color: #eee;
+    background-color: #fff;
     margin-bottom: 15px;
 }
 
@@ -764,8 +773,10 @@ g.trellisLegend {
 }
 
 ul.nav.nav-tabs {
-    margin-top: 5px;
-    margin-bottom: 10px;
+    /* margin-top: 5px; */
+    /* margin-bottom: 10px; */
+    background-color: #fff;
+    padding: 10px 10px 0px 10px;
 }
 
 g rect {
@@ -773,14 +784,46 @@ g rect {
 }
 
 g rect:hover {
-    stroke-width: 2;
+    stroke-width: .5px;
     stroke: rgb(255, 255, 255);
 }
 
 .tab-content {
-    padding: 10px;
+    padding: 5px 5px 15px 5px;
+    background-color: #fff;
 }
 
 table#analysisStatus {
     width: 100%;
+}
+
+.reportControls {
+	background-color: #666;
+	padding-bottom:34px;
+	margin-left:1px;
+	border-bottom: solid #222 1px;
+}
+
+input.btn.btn-default:disabled {
+    background-color: #ccc;
+    color: #fff;
+}
+
+.report {
+    background-color: #eee;
+    margin: 10px 10px 10px 10px;
+    border: solid 1px #ccc;
+}
+
+.reportHeading .fa-area-chart {
+    font-size: 2em;
+    margin-right: 5px;
+}
+
+i.fa.fa-refresh.fa-spin {
+    padding-right: 0px;
+	font-size:1.5em;
+}
+
+rect.box {
 }

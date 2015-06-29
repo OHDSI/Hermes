@@ -1,5 +1,6 @@
 function ViewModel() {
 	var self = this;
+	self.appInitializationFailed = ko.observable(false);
 
 	self.loadingRelated = ko.observable(false);
 	self.loadingEvidence = ko.observable(false);
@@ -10,8 +11,23 @@ function ViewModel() {
 
 	self.cohortAnalyses = ko.observableArray();
 	self.currentReport = ko.observable();
-	self.reports = ko.observableArray(['Person', 'Cohort Specific', 'Conditions by Index', 'Drugs by Index']);
-	self.reportCohortDefinitionId = ko.observable(31);
+	self.reports = ko.observableArray([
+		'Person',
+		'Cohort Specific',
+		'Condition Eras',
+		'Conditions by Index',
+		'Drugs by Index',
+		'Procedures by Index',
+		'Observation Periods',
+		'Condition',
+		'Drug Eras',
+		'Drug Exposure',
+		'Procedure',
+		'Death'
+		//'Measurement'
+	]);
+
+	self.reportCohortDefinitionId = ko.observable();
 	self.reportReportName = ko.observable();
 	self.reportSourceKey = ko.observable();
 	self.reportValid = ko.computed(function () {
@@ -54,7 +70,7 @@ function ViewModel() {
 	self.selectedConcepts = ko.observableArray(null);
 	self.selectedConceptsWarnings = ko.observableArray();
 	self.checkCurrentSource = function (source) {
-		return source.url == pageModel.curentVocabularyUrl();
+		return source.url == self.curentVocabularyUrl();
 	};
 	self.renderHierarchyLink = function (d) {
 		var valid = d.INVALID_REASON_CAPTION == 'Invalid' || d.STANDARD_CONCEPT != 'S' ? 'invalid' : '';
@@ -62,7 +78,7 @@ function ViewModel() {
 	};
 	self.loadJobs = function () {
 		$.ajax({
-			url: pageModel.services()[0].url + 'job/execution?comprehensivePage=true',
+			url: self.services()[0].url + 'job/execution?comprehensivePage=true',
 			method: 'GET',
 			contentType: 'application/json',
 			success: function (jobs) {
@@ -77,20 +93,20 @@ function ViewModel() {
 						jobs.content[j].jobParameters.jobName = 'n/a';
 					}
 				}
-				pageModel.jobs(jobs.content);
-				pageModel.currentView('jobs');
+				self.jobs(jobs.content);
+				self.currentView('jobs');
 			}
 		});
 	};
 	self.analyzeSelectedConcepts = function () {
-		pageModel.selectedConceptsWarnings.removeAll();
+		self.selectedConceptsWarnings.removeAll();
 		var domains = [];
 		var standards = [];
 		var includeNonStandard = false;
 
-		for (var i = 0; i < pageModel.selectedConcepts().length; i++) {
-			var domain = pageModel.selectedConcepts()[i].concept.DOMAIN_ID;
-			var standard = pageModel.selectedConcepts()[i].concept.STANDARD_CONCEPT_CAPTION;
+		for (var i = 0; i < self.selectedConcepts().length; i++) {
+			var domain = self.selectedConcepts()[i].concept.DOMAIN_ID;
+			var standard = self.selectedConcepts()[i].concept.STANDARD_CONCEPT_CAPTION;
 
 			if (standard != 'Standard') {
 				includeNonStandard = true;
@@ -111,15 +127,15 @@ function ViewModel() {
 		}
 
 		if (domains.length > 1) {
-			pageModel.selectedConceptsWarnings.push('Your saved concepts come from multiple Domains (' + domains.join(', ') + ').  A useful set of concepts will typically all come from the same Domain.');
+			self.selectedConceptsWarnings.push('Your saved concepts come from multiple Domains (' + domains.join(', ') + ').  A useful set of concepts will typically all come from the same Domain.');
 		}
 
 		if (standards.length > 1) {
-			pageModel.selectedConceptsWarnings.push('Your saved concepts include different standard concept types (' + standards.join(', ') + ').  A useful set of concepts will typically all be of the same standard concept type.');
+			self.selectedConceptsWarnings.push('Your saved concepts include different standard concept types (' + standards.join(', ') + ').  A useful set of concepts will typically all be of the same standard concept type.');
 		}
 
 		if (includeNonStandard) {
-			pageModel.selectedConceptsWarnings.push('Your saved concepts include Non-Standard or Classification concepts.  Typically concept sets should only include Standard concepts unless advanced use of this concept set is planned.');
+			self.selectedConceptsWarnings.push('Your saved concepts include Non-Standard or Classification concepts.  Typically concept sets should only include Standard concepts unless advanced use of this concept set is planned.');
 		}
 	};
 	self.selectedConceptsIndex = {};
@@ -134,10 +150,27 @@ function ViewModel() {
 	};
 	self.conceptSetInclusionCount = ko.observable(0);
 	self.resolveConceptSetExpression = function () {
-		pageModel.resolvingConceptSetExpression(true);
-		var conceptSetExpression = '{"items" :' + ko.toJSON(pageModel.selectedConcepts()) + '}';
-		var highlightedJson = pageModel.syntaxHighlight(conceptSetExpression);
-		pageModel.currentConceptSetExpressionJson(highlightedJson);
+		self.resolvingConceptSetExpression(true);
+		var conceptSetExpression = '{"items" :' + ko.toJSON(self.selectedConcepts()) + '}';
+		var highlightedJson = self.syntaxHighlight(conceptSetExpression);
+		self.currentConceptSetExpressionJson(highlightedJson);
+
+		$.ajax({
+			url: self.vocabularyUrl() + 'resolveConceptSetExpression',
+			data: conceptSetExpression,
+			method: 'POST',
+			contentType: 'application/json',
+			success: function (info) {
+				self.conceptSetInclusionIdentifiers(info);
+				self.currentIncludedConceptIdentifierList(info.join(','));
+				self.conceptSetInclusionCount(info.length);
+				self.resolvingConceptSetExpression(false);
+			},
+			error: function (err) {
+				alert(err);
+				self.resolvingConceptSetExpression(false);
+			}
+		});
 	};
 	self.syntaxHighlight = function (json) {
 		if (typeof json != 'string') {
@@ -177,11 +210,11 @@ function ViewModel() {
 		$('#wrapperSearchResultsFilter .facetMemberName.selected').each(function (i, d) {
 			filters.push(d.id);
 		});
-		pageModel.feSearch().SetFilter(filters);
+		self.feSearch().SetFilter(filters);
 		// update filter data binding
-		pageModel.feSearch(pageModel.feSearch());
+		self.feSearch(self.feSearch());
 		// update table data binding
-		pageModel.searchResultsConcepts(pageModel.feSearch().GetCurrentObjects());
+		self.searchResultsConcepts(self.feSearch().GetCurrentObjects());
 	};
 	self.updateRelatedFilters = function () {
 		$(event.target).toggleClass('selected');
@@ -190,11 +223,11 @@ function ViewModel() {
 		$('#wrapperRelatedConceptsFilter .facetMemberName.selected').each(function (i, d) {
 			filters.push(d.id);
 		});
-		pageModel.feRelated().SetFilter(filters);
+		self.feRelated().SetFilter(filters);
 		// update filter data binding
-		pageModel.feRelated(pageModel.feRelated());
+		self.feRelated(self.feRelated());
 		// update table data binding
-		pageModel.relatedConcepts(pageModel.feRelated().GetCurrentObjects());
+		self.relatedConcepts(self.feRelated().GetCurrentObjects());
 	};
 	self.selectConcept = function (concept) {
 		document.location = '#/concept/' + concept.CONCEPT_ID;

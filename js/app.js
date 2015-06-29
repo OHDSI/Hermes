@@ -189,7 +189,10 @@ $(document).ready(function () {
 			pageModel.currentView('reports');
 		},
 		'/cohortdefinition/:cohortDefinitionId:': loadCohortDefinition,
-		'/search/:query:': search
+		'/search/:query:': search,
+		'/search': function () {
+			pageModel.currentView('search');
+		}
 	}
 
 	var routerOptions = {
@@ -297,6 +300,9 @@ $(document).ready(function () {
 				service.xhr = xhr;
 				service.thrownError = thrownError;
 				servicePromise.resolve();
+
+				pageModel.appInitializationFailed(true);
+				pageModel.currentView('configure');
 			}
 		});
 	});
