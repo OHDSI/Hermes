@@ -374,8 +374,9 @@ function search(query) {
 		url: pageModel.vocabularyUrl() + 'search/' + query,
 		success: function (results) {
 			if (results.length == 0) {
-				alert('no search results for ' + decodeURI(query));
 				pageModel.currentView('search');
+				$('#modalNoSearchResults').modal('show');
+				return;
 			}
 
 			var searchResultIdentifiers = [];

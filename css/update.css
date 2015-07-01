@@ -638,8 +638,8 @@ ul.ColVis_collection li {
 }
 
 .wrapperTitle .fa {
-	font-size: 2.0em;
-	padding-right: 5px;
+	font-size: 24px;
+	padding-right: 7px;
 }
 
 #wrapperCohortDefinition .fa-check-circle {
@@ -752,6 +752,7 @@ input.btn.btn-default {
 .evidenceVisualization {
 	padding:10px;
 	text-align:center;
+	background-color:#fff
 }
 
 .pad-10 {
@@ -779,13 +780,15 @@ ul.nav.nav-tabs {
     padding: 10px 10px 0px 10px;
 }
 
+div.loader {
+	margin-top:20px;
+}
+
 g rect {
     cursor: pointer;
 }
 
 g rect:hover {
-    stroke-width: .5px;
-    stroke: rgb(255, 255, 255);
 }
 
 .tab-content {
@@ -826,4 +829,14 @@ i.fa.fa-refresh.fa-spin {
 }
 
 rect.box {
+}
+
+
+div#trellisLinePlot {
+    display: flex;
+    flex-shrink: 1;
+}
+
+.dataTable tr td {
+	cursor:pointer;
 }

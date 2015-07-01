@@ -151,33 +151,20 @@
 					<div class="pad-10 report">
 						<div class="reportHeading"><i class="fa fa-area-chart"></i> Person Report</div>
 						<div class="reportSectionHeading">Year of Birth</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">The number of people in this cohort shown with respect to their year of birth.</td>
-								<td class="evidenceVisualization" id="hist"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">The number of people in this cohort shown with respect to their year of birth.</div>
+						<div class="evidenceVisualization" id="hist"></div>
+
 						<div class="reportSectionHeading">Gender</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:50%;">The number of people in this cohort stratified by gender.</td>
-								<td class="evidenceVisualization" id="gender"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">The number of people in this cohort stratified by gender.</div>
+						<div class="evidenceVisualization" id="gender"></div>
+
 						<div class="reportSectionHeading">Race</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:50%;">The number of people in this cohort stratified by race.</td>
-								<td class="evidenceVisualization" id="race"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">The number of people in this cohort stratified by race.</div>
+						<div class="evidenceVisualization" id="race"></div>
+
 						<div class="reportSectionHeading">Ethnicity</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:50%;">The number of people in this cohort stratified by ethnicity.</td>
-								<td class="evidenceVisualization" id="ethnicity"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">The number of people in this cohort stratified by ethnicity.</div>
+						<div class="evidenceVisualization" id="ethnicity"></div>
 					</div>
 				</div>
 
@@ -185,58 +172,32 @@
 					<div class="pad-10 report">
 						<div class="reportHeading"><i class="fa fa-area-chart"></i> Cohort Specific Report</div>
 						<div class="reportSectionHeading">Prevalence by Month</div>
-						<table>
-							<tr>
-								<td class="evidenceVisualization" id="prevalenceByMonth"></td>
-							</tr>
-							<tr>
-								<td class="evidenceDescription">help text here</td>
-							</tr>
-						</table>
+						<div class="evidenceVisualization" id="prevalenceByMonth"></div>
+						<div class="evidenceDescription">help text here</div>
+
 						<div class="reportSectionHeading">Cohort Start</div>
-						<table>
-							<tr>
-								<td class="evidenceVisualization" id="trellisLinePlot"></td>
-							</tr>
-							<tr>
-								<td class="evidenceDescription">help text here</td>
-							</tr>
-						</table>
+						<div class="evidenceVisualization" id="trellisLinePlot"></div>
+						<div class="evidenceDescription">help text here</div>
+
 						<div class="reportSectionHeading">Persons in Cohort from Start to End</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">help text here</td>
-								<td class="evidenceVisualization" id="personinCohortFromStartToEnd"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription" style="width:30%;">help text here</div>
+						<div class="evidenceVisualization" id="personinCohortFromStartToEnd"></div>
+
 						<div class="reportSectionHeading">Number of Persons by Duration from Cohort Start to Cohort End</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">help text here</td>
-								<td class="evidenceVisualization" id="personsByDurationFromStartToEnd"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription" style="width:30%;">help text here</div>
+						<div class="evidenceVisualization" id="personsByDurationFromStartToEnd"></div>
+
 						<div class="reportSectionHeading">Distribution of Age at Cohort Start by Cohort Start Year</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">help text here</td>
-								<td class="evidenceVisualization" id="distributionAgeCohortStartByCohortStartYear"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription" style="width:30%;">help text here</div>
+						<div class="evidenceVisualization" id="distributionAgeCohortStartByCohortStartYear"></div>
+
 						<div class="reportSectionHeading">Age at Index</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">help text here</td>
-								<td class="evidenceVisualization" id="ageAtIndex"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription" style="width:30%;">help text here</div>
+						<div class="evidenceVisualization" id="ageAtIndex"></div>
+
 						<div class="reportSectionHeading">Distribution of Age at Cohort Start by Gender</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">help text here</td>
-								<td class="evidenceVisualization" id="distributionAgeCohortStartByGender"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription" style="width:30%;">help text here</div>
+						<div class="evidenceVisualization" id="distributionAgeCohortStartByGender"></div>
 					</div>
 				</div>
 
@@ -277,13 +238,13 @@
 							</div>
 						</div>
 
-						<div data-bind="if:pageModel.loadingReportDrilldown">
+						<div class="loader" data-bind="if:pageModel.loadingReportDrilldown">
 							<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
 						</div>
 						<div data-bind="if:pageModel.activeReportDrilldown">
 							<div id="conditionDrilldownScatterplotHeading" class="reportSectionHeading">
 							</div>
-							<div id="conditionDrilldownScatterplot"></div>
+							<div class="evidenceVisualization" id="conditionDrilldownScatterplot"></div>
 						</div>
 					</div>
 				</div>
@@ -324,13 +285,13 @@
 							</div>
 						</div>
 
-						<div data-bind="if:pageModel.loadingReportDrilldown">
+						<div class="loader" data-bind="if:pageModel.loadingReportDrilldown">
 							<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
 						</div>
 						<div data-bind="if:pageModel.activeReportDrilldown">
 							<div id="drugDrilldownScatterplotHeading" class="reportSectionHeading">
 							</div>
-							<div id="drugDrilldownScatterplot"></div>
+							<div class="evidenceVisualization"  id="drugDrilldownScatterplot"></div>
 						</div>
 					</div>
 				</div>
@@ -340,76 +301,40 @@
 						<div class="reportHeading"><i class="fa fa-area-chart"></i>Observation Period Report</div>
 
 						<div class="reportSectionHeading">Age at First Observation</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">The distribution of age at first observation in the cohort.</td>
-								<td class="evidenceVisualization" id="ageatfirstobservation"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">The distribution of age at first observation in the cohort.</div>
+						<div class="evidenceVisualization" id="ageatfirstobservation"></div>
 
 						<div class="reportSectionHeading">Age by Gender</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">The distribution of age at first observation in the cohort stratified by gender.</td>
-								<td class="evidenceVisualization" id="agebygender"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">The distribution of age at first observation in the cohort stratified by gender.</div>
+						<div class="evidenceVisualization" id="agebygender"></div>
 
 						<div class="reportSectionHeading">Observation Length</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">Distribution of total observation time in cohort</td>
-								<td class="evidenceVisualization" id="observationlength"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">Distribution of total observation time in cohort</div>
+						<div class="evidenceVisualization" id="observationlength"></div>
 
 						<div class="reportSectionHeading">Observation Length by Gender</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">Distribution of total observation time in cohort by gender</td>
-								<td class="evidenceVisualization" id="opbygender"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">Distribution of total observation time in cohort by gender</div>
+						<div class="evidenceVisualization" id="opbygender"></div>
 
 						<div class="reportSectionHeading">Cumulative Observation</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">Observation time in cohort by % of people in the cohort.</td>
-								<td class="evidenceVisualization" id="cumulativeobservation"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">Observation time in cohort by % of people in the cohort.</div>
+						<div class="evidenceVisualization" id="cumulativeobservation"></div>
 
 						<div class="reportSectionHeading">Observation Length by Age Decile</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">Observation time in cohort by age decile.</td>
-								<td class="evidenceVisualization" id="opbyage"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">Observation time in cohort by age decile.</div>
+						<div class="evidenceVisualization" id="opbyage"></div>
 
 						<div class="reportSectionHeading">Perons with Continuous Observation by Year</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">Perons with Continuous Observation by Year.</td>
-								<td class="evidenceVisualization" id="oppeoplebyyear"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">Perons with Continuous Observation by Year.</div>
+						<div class="evidenceVisualization" id="oppeoplebyyear"></div>
 
 						<div class="reportSectionHeading">Observation Periods per Person</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">The count of observation periods per person</td>
-								<td class="evidenceVisualization" id="opperperson"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">The count of observation periods per person</div>
+						<div class="evidenceVisualization" id="opperperson"></div>
 
 						<div class="reportSectionHeading">Persons With Continuous Observation By Month</div>
-						<table>
-							<tr>
-								<td class="evidenceDescription" style="width:30%;">Persons With Continuous Observation By Month</td>
-								<td class="evidenceVisualization" id="oppeoplebymonthsingle"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">Persons With Continuous Observation By Month</div>
+						<div class="evidenceVisualization" id="oppeoplebymonthsingle"></div>
 
 					</div>
 				</div>
@@ -451,46 +376,26 @@
 							</div>
 						</div>
 
-						<div data-bind="if:pageModel.loadingReportDrilldown">
+						<div class="loader" data-bind="if:pageModel.loadingReportDrilldown">
 							<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
 						</div>
 						<div data-bind="if:pageModel.activeReportDrilldown">
 							<div class="heading" id="conditionEraDrilldown"></div>
 							<div class="reportSectionHeading">Condition Era Prevalence</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="trellisLinePlot"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">help text here</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="trellisLinePlot"></div>
+							<div class="evidenceDescription">help text here</div>
 
 							<div class="reportSectionHeading">Condition Era Prevalence by Month</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="conditioneraPrevalenceByMonth"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">help text here</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="conditioneraPrevalenceByMonth"></div>
+							<div class="evidenceDescription">help text here</div>
 
 							<div class="reportSectionHeading">Age at First Diagnosis</div>
-							<table>
-								<tr>
-									<td class="evidenceDescription" style="width:30%;">help text here</td>
-									<td class="evidenceVisualization" id="conditioneras_age_at_first_diagnosis"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription">help text here</div>
+							<div class="evidenceVisualization" id="conditioneras_age_at_first_diagnosis"></div>
 
 							<div class="reportSectionHeading">Length of Condition Era</div>
-							<table>
-								<tr>
-									<td class="evidenceDescription" style="width:30%;">help text here</td>
-									<td class="evidenceVisualization" id="conditioneras_length_of_era"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription" style="width:30%;">help text here</div>
+							<div class="evidenceVisualization" id="conditioneras_length_of_era"></div>
 						</div>
 					</div>
 				</div>
@@ -531,13 +436,13 @@
 							</div>
 						</div>
 
-						<div data-bind="if:pageModel.loadingReportDrilldown">
+						<div class="loader" data-bind="if:pageModel.loadingReportDrilldown">
 							<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
 						</div>
 						<div data-bind="if:pageModel.activeReportDrilldown">
 							<div id="procedureDrilldownScatterplotHeading" class="reportSectionHeading">
 							</div>
-							<div id="procedureDrilldownScatterplot"></div>
+							<div class="evidenceVisualization"  id="procedureDrilldownScatterplot"></div>
 						</div>
 					</div>
 				</div>
@@ -579,50 +484,27 @@
 							</div>
 						</div>
 
-						<div data-bind="if:pageModel.loadingReportDrilldown">
+						<div class="loader" data-bind="if:pageModel.loadingReportDrilldown">
 							<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
 						</div>
 						<div data-bind="if:pageModel.activeReportDrilldown">
 							<div class="heading" id="conditionDrilldown"></div>
 
 							<div class="reportSectionHeading">Condition Prevalence</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="trellisLinePlot"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Condition Prevalence</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="trellisLinePlot"></div>
+							<div class="evidenceDescription">Condition Prevalence</div>
 
 							<div class="reportSectionHeading">Condition Prevalence by Month</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="conditionPrevalenceByMonth"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Condition Prevalence by Month</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="conditionPrevalenceByMonth"></div>
+							<div class="evidenceDescription">Condition Prevalence by Month</div>
 
 							<div class="reportSectionHeading">Condition Type</div>
-							<table>
-								<tr>
-									<td style="width:30%" class="evidenceDescription">Condition Type</td>
-									<td class="evidenceVisualization" id="conditionsByType"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription">Condition Type</div>
+							<div class="evidenceVisualization" id="conditionsByType"></div>
 
 							<div class="reportSectionHeading">Age at First Diagnosis</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="ageAtFirstDiagnosis"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Age at First Diagnosis</td>
-								</tr>
-							</table>
-
+							<div class="evidenceVisualization" id="ageAtFirstDiagnosis"></div>
+							<div class="evidenceDescription">Age at First Diagnosis</div>
 						</div>
 					</div>
 				</div>
@@ -663,7 +545,7 @@
 							</div>
 						</div>
 
-						<div data-bind="if:pageModel.loadingReportDrilldown">
+						<div class="loader" data-bind="if:pageModel.loadingReportDrilldown">
 							<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
 						</div>
 
@@ -671,45 +553,20 @@
 							<div class="heading" id="drugeraDrilldown"></div>
 
 							<div class="reportSectionHeading">Drug Era Prevalence</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="trellisLinePlot"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Drug Era Prevalence</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="trellisLinePlot"></div>
+							<div class="evidenceDescription">Drug Era Prevalence</div>
 
 							<div class="reportSectionHeading">Drug Era Prevalence by Month</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="drugeraPrevalenceByMonth"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Monthly drug era prevalence</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="drugeraPrevalenceByMonth"></div>
+							<div class="evidenceDescription">Monthly drug era prevalence</div>
 
 							<div class="reportSectionHeading">Age at First Exposure by Gender</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="drugeras_age_at_first_exposure"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Age at First Exposure by Gender</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="drugeras_age_at_first_exposure"></div>
+							<div class="evidenceDescription">Age at First Exposure by Gender</div>
 
 							<div class="reportSectionHeading">Length of Era Distribution</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="drugeras_length_of_era"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Length of Era Distribution</td>
-								</tr>
-							</table>
-
+							<div class="evidenceVisualization" id="drugeras_length_of_era"></div>
+							<div class="evidenceDescription">Length of Era Distribution</div>
 						</div>
 					</div>
 				</div>
@@ -751,71 +608,39 @@
 							</div>
 						</div>
 
-						<div data-bind="if:pageModel.loadingReportDrilldown">
+						<div class="loader" data-bind="if:pageModel.loadingReportDrilldown">
 							<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
 						</div>
 						<div data-bind="if:pageModel.activeReportDrilldown">
 							<div class="heading" id="drugExposureDrilldown"></div>
 
 							<div class="reportSectionHeading">Drug Exposure Prevalence</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="trellisLinePlot"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Drug Exposure Prevalence</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="trellisLinePlot"></div>
+							<div class="evidenceDescription">Drug Exposure Prevalence</div>
 
 							<div class="reportSectionHeading">Drug Exposure Prevalence by Month</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="drugPrevalenceByMonth"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Drug Exposure Prevalence by Month</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="drugPrevalenceByMonth"></div>
+							<div class="evidenceDescription">Drug Exposure Prevalence by Month</div>
 
 							<div class="reportSectionHeading">Age at First Exposure</div>
-							<table>
-								<tr>
-									<td style="width:30%" class="evidenceDescription">Age at First Exposure</td>
-									<td class="evidenceVisualization" id="ageAtFirstExposure"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription">Age at First Exposure</div>
+							<div class="evidenceVisualization" id="ageAtFirstExposure"></div>
 
 							<div class="reportSectionHeading">Days Supply Distribution</div>
-							<table>
-								<tr>
-									<td style="width:30%" class="evidenceDescription">Days Supply Distribution</td>
-									<td class="evidenceVisualization" id="daysSupplyDistribution"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription">Days Supply Distribution</div>
+							<div class="evidenceVisualization" id="daysSupplyDistribution"></div>
 
 							<div class="reportSectionHeading">Quantity Distribution</div>
-							<table>
-								<tr>
-									<td style="width:30%" class="evidenceDescription">Quantity Distribution</td>
-									<td class="evidenceVisualization" id="quantityDistribution"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription">Quantity Distribution</div>
+							<div class="evidenceVisualization" id="quantityDistribution"></div>
 
 							<div class="reportSectionHeading">Refills Distribution</div>
-							<table>
-								<tr>
-									<td style="width:30%" class="evidenceDescription">Refills Distribution</td>
-									<td class="evidenceVisualization" id="refillsDistribution"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription">Refills Distribution</div>
+							<div class="evidenceVisualization" id="refillsDistribution"></div>
 
 							<div class="reportSectionHeading">Drugs by Type</div>
-							<table>
-								<tr>
-									<td style="width:30%" class="evidenceDescription">Drugs by Type</td>
-									<td class="evidenceVisualization" id="drugsByType"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription">Drugs by Type</div>
+							<div class="evidenceVisualization" id="drugsByType"></div>
 						</div>
 					</div>
 				</div>
@@ -856,47 +681,27 @@
 							</div>
 						</div>
 
-						<div data-bind="if:pageModel.loadingReportDrilldown">
+						<div class="loader" data-bind="if:pageModel.loadingReportDrilldown">
 							<i class="fa fa-refresh fa-spin"></i> Loading Drilldown...
 						</div>
 						<div data-bind="if:pageModel.activeReportDrilldown">
 							<div class="heading" id="procedureDrilldown"></div>
 
 							<div class="reportSectionHeading">Procedure Prevalence</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="trellisLinePlot"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Procedure Prevalence</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="trellisLinePlot"></div>
+							<div class="evidenceDescription">Procedure Prevalence</div>
 
 							<div class="reportSectionHeading">Procedure Prevalence by Month</div>
-							<table>
-								<tr>
-									<td class="evidenceVisualization" id="procedurePrevalenceByMonth"></td>
-								</tr>
-								<tr>
-									<td class="evidenceDescription">Procedure Prevalence by Month</td>
-								</tr>
-							</table>
+							<div class="evidenceVisualization" id="procedurePrevalenceByMonth"></div>
+							<div class="evidenceDescription">Procedure Prevalence by Month</div>
 
 							<div class="reportSectionHeading">Procedures by Type</div>
-							<table>
-								<tr>
-									<td style="width:30%" class="evidenceDescription">Procedures by Type</td>
-									<td class="evidenceVisualization" id="proceduresByType"></td>
-								</tr>
-							</table>
+							<div class="evidenceDescription">Procedures by Type</div>
+							<div class="evidenceVisualization" id="proceduresByType"></div>
 
 							<div class="reportSectionHeading">Age at First Occurrence</div>
-							<table>
-								<tr>
-									<td style="width:30%" class="evidenceDescription">Age at First Occurrence</td>
-									<td class="evidenceVisualization" id="ageAtFirstOccurrence"></td>
-								</tr>
-							</table>
+							<div style="width:30%" class="evidenceDescription">Age at First Occurrence</div>
+							<div class="evidenceVisualization" id="ageAtFirstOccurrence"></div>
 						</div>
 					</div>
 				</div>
@@ -912,20 +717,12 @@
 						<div class="evidenceVisualization" id="deathPrevalenceByMonth"></div>
 
 						<div class="reportSectionHeading">Death by Type</div>
-						<table>
-							<tr>
-								<td style="width:30%" class="evidenceDescription">Death by Type</td>
-								<td class="evidenceVisualization" id="deathByType"></td>
-							</tr>
-						</table>
+						<div class="evidenceDescription">Death by Type</div>
+						<div class="evidenceVisualization" id="deathByType"></div>
 
 						<div class="reportSectionHeading">Age at Death</div>
-						<table>
-							<tr>
-								<td style="width:30%" class="evidenceDescription">Age at Death</td>
-								<td class="evidenceVisualization" id="ageAtDeath"></td>
-							</tr>
-						</table>
+						<div style="width:30%" class="evidenceDescription">Age at Death</div>
+						<div class="evidenceVisualization" id="ageAtDeath"></div>
 					</div>
 				</div>
 			</div>
@@ -1669,14 +1466,12 @@
 						<button type="button" onclick="selectAllRelated()" class="btn btn-sm btn-primary selectAllButton">Select All Related</button>
 					</div>
 				</div>
-
 			</div>
 
 			<div id="wrapperSearch" data-bind="if: currentView() == 'search'">
 				<div class="wrapperTitle"><i class="fa fa-search"></i> Vocabulary Search</div>
 				<div class="paddedWrapper">
 					<input id="querytext" placeholder="type your search here" class="form-control" type="text" data-bind="event: { keyup: checkExecuteSearch}" />
-
 
 					<div id="helpMinimumQueryLength" class="modal fade">
 						<div class="modal-dialog">
@@ -1686,20 +1481,25 @@
 									</button>
 								</div>
 								<div class="modal-body">
-									<p>Search string must be at least 3 characters long.</p>
+									<p>Search string must be at least 3 characters long</p>
 								</div>
 							</div>
 						</div>
 					</div>
 
-					<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-						<div class="modal-dialog modal-sm">
+					<div id="modalNoSearchResults" class="modal fade">
+						<div class="modal-dialog">
 							<div class="modal-content">
-								search string must be at least 3 characters long
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="modal-body">
+									<p>Your search had no results.</p>
+								</div>
 							</div>
 						</div>
 					</div>
-
 				</div>
 			</div>
 

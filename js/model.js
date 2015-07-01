@@ -199,7 +199,7 @@ function ViewModel() {
 			if (query.length > 2) {
 				document.location = "#/search/" + encodeURI(query);
 			} else {
-				$('#helpMinimumQueryLength').modal('show')
+				$('#helpMinimumQueryLength').modal('show');
 			}
 		}
 	};

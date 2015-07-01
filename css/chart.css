@@ -59,6 +59,8 @@ table.boxplotValues tr td
 {
 	text-align: right;
 	padding: 0px 3px;
+	color:#fff;
+	font-size:11px;
 }
 
 .lineplot .line {

@@ -161,7 +161,7 @@ function runReport() {
 			}
 		});
 		break;
-	// not yet implemented
+		// not yet implemented
 	case 'Measurement':
 		$.ajax({
 			url: pageModel.services()[0].url + pageModel.reportSourceKey() + '/cohortresults/' + pageModel.reportCohortDefinitionId() + '/measurement',
@@ -239,6 +239,13 @@ function runReport() {
 						lengthChange: false,
 						deferRender: true,
 						destroy: true
+					});
+
+					$(document).on('click', '.dataTable tbody tr', function () {
+						var data = $('.dataTable').DataTable().row(this).data();
+						if (data) {
+							procedureDrilldown(data.concept_id, data.procedure_name);
+						}
 					});
 
 					var tree = buildHierarchyFromJSON(normalizedData, threshold);
@@ -356,6 +363,13 @@ function runReport() {
 						destroy: true
 					});
 
+					$(document).on('click', '.dataTable tbody tr', function () {
+						var data = $('.dataTable').DataTable().row(this).data();
+						if (data) {
+							drugExposureDrilldown(data.concept_id, data.rxnorm);
+						}
+					});
+
 					var tree = buildHierarchyFromJSON(data, threshold);
 					var treemap = new jnj_chart.treemap();
 					treemap.render(tree, '#treemap_container', width, height, {
@@ -462,6 +476,13 @@ function runReport() {
 						lengthChange: false,
 						deferRender: true,
 						destroy: true
+					});
+
+					$(document).on('click', '.dataTable tbody tr', function () {
+						var data = $('.dataTable').DataTable().row(this).data();
+						if (data) {
+							drugeraDrilldown(data.concept_id, data.ingredient);
+						}
 					});
 
 					var tree = eraBuildHierarchyFromJSON(data, threshold);
@@ -575,6 +596,13 @@ function runReport() {
 						lengthChange: false,
 						deferRender: true,
 						destroy: true
+					});
+
+					$(document).on('click', '.dataTable tbody tr', function () {
+						var data = $('.dataTable').DataTable().row(this).data();
+						if (data) {
+							conditionDrilldown(data.concept_id, data.snomed);
+						}
 					});
 
 					tree = buildHierarchyFromJSON(data, threshold);
@@ -948,6 +976,13 @@ function runReport() {
 						lengthChange: false,
 						deferRender: true,
 						destroy: true
+					});
+
+					$(document).on('click', '.dataTable tbody tr', function () {
+						var data = $('.dataTable').DataTable().row(this).data();
+						if (data) {
+							conditionEraDrilldown(data.concept_id, data.snomed);
+						}
 					});
 
 					var tree = eraBuildHierarchyFromJSON(data, threshold);
@@ -2387,7 +2422,14 @@ function drilldown(id, name, type) {
 					{
 						label: 'Duration Relative to Index',
 						accessor: function (o) {
-							return o.duration;
+							var years = Math.round(o.duration / 365);
+							var days = o.duration % 365;
+							var result = '';
+							if (years != 0)
+								result += years + 'y ';
+
+							result += days + 'd'
+							return result;
 						}
 					},
 					{

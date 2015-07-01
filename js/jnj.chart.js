@@ -515,7 +515,8 @@
 				.attr('class', 'd3-tip')
 				.offset([-10, 0])
 				.html(function (d) {
-					return '<table class="boxplotValues">' + '<tr><td>Max:</td><td>' + valueFormatter(d.max) + '</td></tr>' + '<tr><td>P90:</td><td>' + valueFormatter(d.UIF) + '</td></tr>' + '<tr><td>P75:</td><td>' + valueFormatter(d.q3) + '</td></tr>' + '<tr><td>Median:</td><td>' + valueFormatter(d.median) + '</td></tr>' + '<tr><td>P25:</td><td>' + valueFormatter(d.q1) + '</td></tr>' + '<tr><td>P10:</td><td>' + valueFormatter(d.LIF) + '</td></tr>' + '<tr><td>Min:</td><td>' + valueFormatter(d.min) + '</td></tr>' + '</table>';
+					var content = '<table class="boxplotValues">' + '<tr><td>Max:</td><td>' + valueFormatter(d.max) + '</td></tr>' + '<tr><td>P90:</td><td>' + valueFormatter(d.UIF) + '</td></tr>' + '<tr><td>P75:</td><td>' + valueFormatter(d.q3) + '</td></tr>' + '<tr><td>Median:</td><td>' + valueFormatter(d.median) + '</td></tr>' + '<tr><td>P25:</td><td>' + valueFormatter(d.q1) + '</td></tr>' + '<tr><td>P10:</td><td>' + valueFormatter(d.LIF) + '</td></tr>' + '<tr><td>Min:</td><td>' + valueFormatter(d.min) + '</td></tr>' + '</table>';
+					return content;
 				})
 			svg.call(tip);
 
@@ -1937,7 +1938,6 @@
 
 			chart.call(renderLegend);
 
-
 			$(window).on("resize", {
 					container: $(target),
 					chart: $(target + " svg"),
@@ -1945,8 +1945,9 @@
 				},
 				function (event) {
 					var targetWidth = event.data.container.width();
+					var targetHeight = Math.round(targetWidth / event.data.aspect);
 					event.data.chart.attr("width", targetWidth);
-					event.data.chart.attr("height", Math.round(targetWidth / event.data.aspect));
+					event.data.chart.attr("height",targetHeight);
 				}).trigger("resize");
 
 			function mouseover() {
