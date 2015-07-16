@@ -211,6 +211,7 @@ $(document).ready(function () {
 		service.sources = [];
 		var servicePromise = $.Deferred();
 		initPromises.push(servicePromise);
+		service.initializationErrors = ko.observableArray();
 
 		$.ajax({
 			url: service.url + 'source/sources',
@@ -219,6 +220,12 @@ $(document).ready(function () {
 			success: function (sources) {
 				service.available = true;
 				var completedSources = 0;
+				if (sources.length == 0) {
+					service.initializationErrors.push('The WebAPI is active but no sources are currently configured.');
+					pageModel.appInitializationFailed(true);
+					servicePromise.resolve();
+					return;
+				}
 
 				$.each(sources, function (sourceIndex, source) {
 					source.hasVocabulary = false;
@@ -283,7 +290,7 @@ $(document).ready(function () {
 						error: function (err) {
 							completedSources++;
 							source.initialized = false;
-							pageModel.initializationErrors++;
+							pageModel.initializationErrors.push('Failure initializing ' + source.sourceKey + ' at ' + service.url + source.sourceKey + '/');
 							source.error = err.statusText;
 							source.version = 'unknown';
 							source.dialect = 'unknown';
@@ -298,7 +305,7 @@ $(document).ready(function () {
 			error: function (xhr, ajaxOptions, thrownError) {
 				service.available = false;
 				service.xhr = xhr;
-				service.thrownError = thrownError;
+				service.thrownError = 'Failure while attempting to load the list of sources from the WebAPI ' + thrownError;
 				servicePromise.resolve();
 
 				pageModel.appInitializationFailed(true);
@@ -312,8 +319,14 @@ $(document).ready(function () {
 });
 
 function initComplete() {
-	pageModel.currentView('search');
-	router.init();
+	if (pageModel.vocabularyUrl() == undefined) {
+		pageModel.initializationErrors.push('Failed to find an available Vocabulary Daimon.');
+		pageModel.appInitializationFailed(true);
+		pageModel.currentView('configure');
+	} else {
+		pageModel.currentView('search');
+		router.init();
+	}
 }
 
 function routeNotFound(d) {
@@ -362,7 +375,6 @@ function renderCurrentConceptSelector() {
 function renderCheckbox(field) {
 	return '<span data-bind="click: function(d) { d.' + field + '(!d.' + field + '()); pageModel.resolveConceptSetExpression(); } ,css: { selected: ' + field + '} " class="glyphicon glyphicon-ok"></span>';
 }
-
 
 function search(query) {
 	pageModel.currentView('loading');
@@ -620,22 +632,44 @@ function metagorize(metarchy, related) {
 		if (hasRelationship(related, meta.parentRelationships)) {
 			metarchy.parents.push(related);
 		}
-		if (hasRelationship(related, meta.synonymRelationships)) {
-			metarchy.synonyms.push(related);
-		}
 	}
 }
 
 function hasRelationship(concept, relationships) {
 	for (var r = 0; r < concept.RELATIONSHIPS.length; r++) {
 		for (var i = 0; i < relationships.length; i++) {
-			if (concept.RELATIONSHIPS[r].RELATIONSHIP_NAME == relationships[i]) {
-				return true;
+			if (concept.RELATIONSHIPS[r].RELATIONSHIP_NAME == relationships[i].name) {
+				if (concept.RELATIONSHIPS[r].RELATIONSHIP_DISTANCE >= relationships[i].range[0] && concept.RELATIONSHIPS[r].RELATIONSHIP_DISTANCE <= relationships[i].range[1]) {
+					return true;
+				}
 			}
 		}
 	}
 	return false;
 }
+
+function meetsRequirements(concept, requirements) {
+	var passCount = 0;
+
+	for (var r = 0; r < requirements.length; r++) {
+		for (var f = 0; f < this.fe.Facets.length; f++) {
+			if (this.fe.Facets[f].caption == requirements[r].c) {
+				for (var m = 0; m < this.fe.Facets[f].Members.length; m++) {
+					if (this.fe.Facets[f].Members[m].Name == requirements[r].n) {
+						passCount++;
+					}
+				}
+			}
+		}
+	}
+
+	if (filters.length == requirements.length) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 
 function loadCohortDefinition(cohortDefinitionId) {
 	pageModel.currentView('loading');

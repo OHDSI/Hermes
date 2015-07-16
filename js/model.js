@@ -55,7 +55,7 @@ function ViewModel() {
 	self.resolvingConceptSetExpression = ko.observable();
 	self.evidence = ko.observableArray();
 	self.services = ko.observableArray(configuredServices);
-	self.initializationErrors = 0;
+	self.initializationErrors = ko.observableArray();
 	self.vocabularyUrl = ko.observable();
 	self.evidenceUrl = ko.observable();
 	self.resultsUrl = ko.observable();

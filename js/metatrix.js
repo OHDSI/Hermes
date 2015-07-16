@@ -1,62 +1,142 @@
 var metatrix = {
 	'RxNorm.Ingredient': {
-		childRelationships: ['Ingredient of (RxNorm)'],
-		parentRelationships: ['Has inferred drug class (OMOP)'],
-		synonymRelationships: ['Has tradename (RxNorm)']
+		childRelationships: [{
+			name: 'Ingredient of (RxNorm)',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Has inferred drug class (OMOP)',
+			range: [0, 999]
+		}]
 	},
 	'RxNorm.Brand Name': {
-		childRelationships: ['Ingredient of (RxNorm)'],
-		parentRelationships: ['Tradename of (RxNorm)'],
-		synonymRelationships: ['Has precise ingredient (RxNorm) ']
+		childRelationships: [{
+			name: 'Ingredient of (RxNorm)',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Tradename of (RxNorm)',
+			range: [0, 999]
+		}]
 	},
 	'RxNorm.Branded Drug': {
-		childRelationships: ['Consists of (RxNorm)'],
-		parentRelationships: ['Has ingredient (RxNorm)', 'RxNorm to ATC (RxNorm)', 'RxNorm to ETC (FDB)'],
-		synonymRelationships: ['RxNorm to SPL (NLM)']
+		childRelationships: [{
+			name: 'Consists of (RxNorm)',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Has ingredient (RxNorm)',
+			range: [0, 999]
+		}, {
+			name: 'RxNorm to ATC (RxNorm)',
+			range: [0, 999]
+		}, {
+			name: 'RxNorm to ETC (FDB)',
+			range: [0, 999]
+		}]
 	},
 	'RxNorm.Clinical Drug Comp': {
 		childRelationships: [],
-		parentRelationships: ['Has precise ingredient (RxNorm)', 'Has ingredient (RxNorm)'],
-		synonymRelationships: ['Constitutes (RxNorm)', 'Non-standard to Standard map (OMOP)', 'Has tradename (RxNorm)']
+		parentRelationships: [{
+			name: 'Has precise ingredient (RxNorm)',
+			range: [0, 999]
+		}, {
+			name: 'Has ingredient (RxNorm)',
+			range: [0, 999]
+		}]
 	},
 	'CPT4.CPT4': {
 		childRelationships: [],
-		parentRelationships: ['Is a'],
+		parentRelationships: [{
+			name: 'Is a',
+			range: [0, 999]
+		}],
 		synonymRelationships: []
 	},
 	'CPT4.CPT4 Hierarchy': {
-		childRelationships: ['Subsumes'],
-		parentRelationships: ['Is a'],
-		synonymRelationships: ['Standard to Non-standard map (OMOP)']
+		childRelationships: [{
+			name: 'Subsumes',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Is a',
+			range: [0, 999]
+		}]
 	},
 	'ETC.ETC': {
-		childRelationships: ['Subsumes', 'Inferred drug class of (OMOP)'],
-		parentRelationships: ['Is a', 'Has ancestor of'],
-		synonymRelationships: ['Has precise ingredient (RxNorm) ']
+		childRelationships: [{
+			name: 'Subsumes',
+			range: [0, 999]
+		}, {
+			name: 'Inferred drug class of (OMOP)',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Is a',
+			range: [0, 999]
+		}, {
+			name: 'Has ancestor of',
+			range: [0, 999]
+		}]
+	},
+	'MedDRA.LLT': {
+		childRelationships: [],
+		parentRelationships: [{
+			name: 'Has ancestor of',
+			range: [0, 1]
+		}, {
+			name: 'Is a',
+			range: [0, 1]
+		}]
 	},
 	'MedDRA.PT': {
-		childRelationships: ['Subsumes'],
-		parentRelationships: ['Has ancestor of'],
-		synonymRelationships: ['MedDRA to ICD-9-CM (MSSO)']
+		childRelationships: [{
+			name: 'Subsumes',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Has ancestor of',
+			range: [0, 999]
+		}]
 	},
 	'MedDRA.HLT': {
-		childRelationships: ['Subsumes'],
-		parentRelationships: ['Has ancestor of'],
-		synonymRelationships: []
+		childRelationships: [{
+			name: 'Subsumes',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Has ancestor of',
+			range: [0, 999]
+		}]
 	},
 	'MedDRA.SOC': {
-		childRelationships: ['Subsumes'],
-		parentRelationships: [],
-		synonymRelationships: []
+		childRelationships: [{
+			name: 'Subsumes',
+			range: [0, 999]
+		}],
+		parentRelationships: []
 	},
 	'MedDRA.HLGT': {
-		childRelationships: ['Subsumes'],
-		parentRelationships: ['Is a'],
-		synonymRelationships: ['MedDRA to SNOMED equivalent (OMOP)']
+		childRelationships: [{
+			name: 'Subsumes',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Is a',
+			range: [0, 999]
+		}]
 	},
 	'SNOMED.Clinical Finding': {
-		childRelationships: ['Subsumes'],
-		parentRelationships: ['Is a', 'Has ancestor of'],
-		synonymRelationships: ['MedDRA to SNOMED equivalent (OMOP)']
+		childRelationships: [{
+			name: 'Subsumes',
+			range: [0, 999]
+		}],
+		parentRelationships: [{
+			name: 'Is a',
+			range: [0, 999]
+		}, {
+			name: 'Has ancestor of',
+			range: [0, 1]
+		}]
 	}
 };

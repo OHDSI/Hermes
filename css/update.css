@@ -22,9 +22,8 @@ body {
 .heading {
 	font-size: 14px;
 
-	/* font-weight: bold; */
 	margin-top: 5px;
-	margin-bottom: 0px;
+	margin-bottom: 5px;
 	/* clear:both; */
 	/* height:40px; */
 	/* background-color: #f00; */
@@ -178,7 +177,7 @@ pre span.key {
 	height: 50px;
 	padding: 0px 10px 0px 10px;
 	line-height: 50px;
-	font-size: 14px;
+	font-size: 18px;
 	background-color: #fff;
 	color: #222;
 	border-bottom: solid 1px #ccc;
@@ -214,9 +213,9 @@ div#wrapperMainWindowContainer {}
 	background-color: #222;
 	height: 50px;
 	color: #FFFFFF;
-	line-height: 60px;
+	line-height: 52px;
 	padding: 0px 10px 0px 10px;
-	font-size: 14px;
+	font-size: 18px;
 	border-bottom: solid 1px #ccc;
 }
 
@@ -413,11 +412,11 @@ td .fa-shopping-cart {
 }
 
 td.invalid {
-	background-color: #c00;
+	background-color: #D2322F;
 }
 
 span.invalid {
-	color: #c00;
+	color: #D2322F;
 }
 
 .nav-tabs>li {
@@ -456,15 +455,19 @@ label {
 }
 
 .error {
-	padding: 7px;
+	padding: 3px;
 	font-size: .9em;
 	font-family: courier new;
 	color: #444;
-	background-color: #fee;
+	background-color: #FFF5F5;
 	margin: 7px;
+	/* border-top: solid 1px #666; */
+	/* border-left: solid 1px #666; */
+	/* border-right: solid 1px #666; */
+	border-bottom: solid 1px #800;
 }
-/* circle packing */
 
+/* circle packing */
 text {
 	font-size: 6px;
 	pointer-events: none;
@@ -617,7 +620,7 @@ ul.ColVis_collection li {
 }
 
 #wrapperChildren {
-	padding-left: 50px;
+	padding-left: 100px;
 }
 
 .configureSourceTable i.fa {
@@ -628,9 +631,21 @@ ul.ColVis_collection li {
 	color: #800;
 }
 
-#wrapperSynonyms {
-	padding-left: 30px;
-	padding-bottom: 20px;
+.heading i.fa.fa-exclamation-circle {
+	color: #800;
+	font-size:24px;
+}
+
+#wrapperHierarchyAnchor {
+	margin-left: 50px;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	font-size:14px;
+	background-color: #eee;
+	padding-left: 10px;
+	border-top: solid 1px #222;
+	border-bottom: solid 1px #222;
+	margin-bottom: 20px;
 }
 
 #wrapperCohort {
@@ -638,8 +653,8 @@ ul.ColVis_collection li {
 }
 
 .wrapperTitle .fa {
-	font-size: 24px;
-	padding-right: 7px;
+	font-size: 20px;
+	padding-right: 3px;
 }
 
 #wrapperCohortDefinition .fa-check-circle {
@@ -825,7 +840,8 @@ input.btn.btn-default:disabled {
 
 i.fa.fa-refresh.fa-spin {
     padding-right: 0px;
-	font-size:1.5em;
+
+    font-size: 1.0em;
 }
 
 rect.box {
