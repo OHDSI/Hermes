@@ -1,6 +1,6 @@
-var ohdsi_services = [
+var configuredServices = [
 	{
-		name: 'Public',
-		url: 'http://api.ohdsi.org:2241/WebAPI/'
+		name: 'Local',
+		url: 'http://localhost:8080/WebAPI/'
 	}
 ];

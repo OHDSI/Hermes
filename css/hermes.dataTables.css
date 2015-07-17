@@ -48,6 +48,7 @@ table.dataTable.display tbody tr.odd:hover {
 
 ul.ColVis_collection {
 	width: 200px;
+	right: 0px;
 }
 button.ColVis_Button {
 	margin-left: 10px;
